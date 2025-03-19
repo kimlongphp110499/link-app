@@ -46,6 +46,10 @@ return [
             'provider' => 'users',
             'hash' => false,
         ],
+        'admin' => [
+            'driver' => 'session',
+            'provider' => 'admins',  // Đây là tên provider bạn sẽ thêm vào phần dưới
+        ],
     ],
 
     /*
@@ -74,7 +78,11 @@ return [
         // 'users' => [
         //     'driver' => 'database',
         //     'table' => 'users',
-        // ],
+        
+        'admins' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Admin::class,  // Model cho admin
+        ],
     ],
 
     /*
