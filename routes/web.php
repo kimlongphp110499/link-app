@@ -13,14 +13,18 @@ use Illuminate\Support\Facades\Route;
 |
 */
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\LinkController;
+use App\Http\Controllers\UserController;
 
 
 Route::get('/admin/login', [AdminController::class, 'showLoginForm'])->name('admin.login');
 Route::post('/admin/login', [AdminController::class, 'login']);
 Route::post('/admin/logout', [AdminController::class, 'logout'])->name('admin.logout');
-Route::middleware('auth:admin')->group(function () {
-    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+Route::name('admin.')->middleware('auth:admin')->prefix('admin')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
     Route::resource('admin', AdminController::class)->middleware('auth');
+    Route::resource('links', LinkController::class);
+    Route::resource('users', UserController::class);
 
 });
 
