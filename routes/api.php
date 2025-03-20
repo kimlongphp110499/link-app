@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UserVoteLinkController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\MessageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,3 +36,5 @@ Route::get('links/search', [UserVoteLinkController::class, 'searchLinks']);
 // api để lấy danh sách rank links
 
 Route::put('users/{userId}', [UserController::class, 'updateUser']);
+
+Route::post('/messages', [MessageController::class, 'saveMessage']);

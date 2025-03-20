@@ -1,41 +1,80 @@
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
+const Redis = require('ioredis');
+const axios = require('axios'); 
+// Tạo một ứng dụng Express
 const app = express();
 const server = http.createServer(app);
+
+// Cấu hình CORS cho socket.io
 const io = socketIo(server, {
   cors: {
-    origin: '*',  // Allow all origins for testing
-    methods: ['GET', 'POST']
+    origin: "*",
+    methods: ["GET", "POST"],
+    allowedHeaders: ["my-custom-header"],
+    credentials: true
   }
 });
 
-let room = 'chat_room';
 
-// Cấu hình kết nối socket.io
+// Kết nối Redis
+const redis = new Redis({
+    host: 'redis', // Đây sẽ là tên của container Redis trong Docker Compose
+    port: 6379,    // Cổng mặc định của Redis
+});
+
+// Lắng nghe kết nối từ client
 io.on('connection', (socket) => {
-    console.log('a user connected');
+    console.log('User connected');
 
-    socket.join(room);
-
-    socket.on('disconnect', () => {
-        console.log('user disconnected');
+    redis.lrange('chat:messages', 0, -1, (err, messages) => {
+      if (err) {
+          console.error('Error retrieving messages from Redis:', err);
+          return;
+      }
+      // Gửi tất cả các tin nhắn cũ cho người dùng khi kết nối
+      messages.reverse().forEach((message) => {
+        console.log( JSON.parse(message))
+          socket.emit('message', JSON.parse(message));  // Gửi tin nhắn đã được lưu
+      });
+  });
+    // Lắng nghe sự kiện 'message' từ client
+    socket.on('message', (data, user_id) => {
+        console.log('Message received:', data, user_id);
+      
+        axios.post('http://link.local/api/messages', {
+          message: data,
+          user_id: user_id
+        })
+        .then((response) => {
+          console.log('Message saved to queue:', response.data);
+        })
+        .catch((error) => {
+          console.error('Error saving message:', error);
+        });
+        // Truyền tin nhắn tới tất cả người dùng trong room "default"
+        io.to('default').emit('message', data, user_id);
+        
+        // Lưu tin nhắn vào Redis (tùy chọn)
+       redis.lpush('chat:messages', JSON.stringify(data)); // Lưu vào Redis với key "chat:messages"
     });
 
-    socket.on('chat_message', (msg) => {
-        // Broadcast message to room
-        io.to(room).emit('chat_message', msg);
-        
-        // Lưu tin nhắn vào Laravel bằng API hoặc Queue Job
-        fetch('http://link.local/api/save_message', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: msg })
-        });
+    // Tham gia vào room "default"
+    socket.join('default');
+
+    // Lắng nghe khi người dùng ngắt kết nối
+    socket.on('disconnect', () => {
+        console.log('User disconnected');
     });
 });
 
-// Lắng nghe tại port 4000
+// Serve các tài nguyên tĩnh (tùy chọn)
+app.get('/', (req, res) => {
+    res.send('Socket.IO server is running');
+});
+
+// Khởi chạy server
 server.listen(4000, () => {
-    console.log('Socket.IO server running on port 4000');
+    console.log('Server listening on port 4000');
 });

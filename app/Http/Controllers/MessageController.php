@@ -11,7 +11,7 @@ class MessageController extends Controller
     public function saveMessage(Request $request)
     {
         // Gửi job lưu tin nhắn vào queue
-        dispatch(new SaveMessage($request->message, auth()->user()->id));
+        dispatch(new SaveMessage($request->message, $request->user_id));
 
         return response()->json(['message' => 'Message saved to queue.']);
     }
