@@ -9,7 +9,7 @@ class Link extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'url', 'total_votes'];
+    protected $fillable = ['title', 'url', 'total_votes', 'clan_id'];
 
     public function voteHistories()
     {
@@ -19,5 +19,10 @@ class Link extends Model
     public function getTotalVotesAttribute()
     {
         return $this->voteHistories()->sum('points_voted');
+    }
+
+    public function clan()
+    {
+        return $this->belongsTo(Clan::class);
     }
 }

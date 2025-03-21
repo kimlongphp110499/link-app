@@ -35,6 +35,22 @@
         <div class="text-danger">{{ $message }}</div>
       @enderror
     </div>
+    <div class="form-group">
+      <label for="clan">Assign Clan</label>
+      <select name="clan_id"
+              class="form-control">
+        <option value="">-- Select Clan --</option>
+        @foreach ($clans as $clan)
+          <option value="{{ $clan->id }}"
+                  {{ old('clan_id', $link->clan_id) == $clan->id ? 'selected' : '' }}>
+            {{ $clan->name }}
+          </option>
+        @endforeach
+      </select>
+      @error('clan_id')
+        <div class="text-danger">{{ $message }}</div>
+      @enderror
+    </div>
     <button type="submit"
             class="btn btn-warning">Update Link</button>
   </form>

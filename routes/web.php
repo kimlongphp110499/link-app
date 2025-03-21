@@ -15,18 +15,26 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\LinkController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ClanController;
 
 
 Route::get('/admin/login', [AdminController::class, 'showLoginForm'])->name('admin.login');
 Route::post('/admin/login', [AdminController::class, 'login']);
 Route::post('/admin/logout', [AdminController::class, 'logout'])->name('admin.logout');
+
 Route::name('admin.')->middleware('auth:admin')->prefix('admin')->group(function () {
-    Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
-    Route::resource('admin', AdminController::class)->middleware('auth');
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/', [AdminController::class, 'index'])->name('list');
     Route::resource('links', LinkController::class);
     Route::resource('users', UserController::class);
+    Route::resource('clans', ClanController::class);
+
+    // Cộng điểm cho clan
+    Route::post('clans/{clanId}/add-points', [ClanController::class, 'addPoints']);
+    Route::post('links/{linkId}/assign-clan', [LinkController::class, 'assignClan'])->name('links.assign-clan');
 
 });
+Route::resource('admin', AdminController::class)->middleware('auth:admin');
 
 Route::get('/', function () {
     return view('welcome');

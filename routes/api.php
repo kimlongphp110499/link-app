@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UserVoteLinkController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\Api\ClanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,8 +34,9 @@ Route::get('links/rank', [UserVoteLinkController::class, 'rankLinks']);
 // api để lấy danh sách rank links
 
 Route::get('links/search', [UserVoteLinkController::class, 'searchLinks']);
-// api để lấy danh sách rank links
 
 Route::put('users/{userId}', [UserController::class, 'updateUser']);
 
 Route::post('/messages', [MessageController::class, 'saveMessage']);
+
+Route::get('clans/top-voter', [ClanController::class, 'getClansWithTopVoter']);

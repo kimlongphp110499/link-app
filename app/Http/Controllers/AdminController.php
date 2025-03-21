@@ -9,10 +9,11 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
 {
-    // public function index()
-    // {
-    //     return view('admin.dashboard');
-    // }
+    public function dashboard()
+    {
+        return view('admin.dashboard');
+    }
+
     // Hiển thị trang đăng nhập
     public function showLoginForm()
     {
@@ -52,7 +53,7 @@ class AdminController extends Controller
     // Hiển thị danh sách Admin
     public function index()
     {
-        $admins = Admin::all();
+        $admins = Admin::paginate(20);
         return view('admin.index', compact('admins'));
     }
 
@@ -109,5 +110,9 @@ class AdminController extends Controller
     {
         $admin->delete();
         return redirect()->route('admin.index');
+    }
+
+    public function show(Request $request)
+    {
     }
 }
