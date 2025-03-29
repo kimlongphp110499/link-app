@@ -33,4 +33,28 @@ class UserController extends Controller
             'user' => $user
         ], 200);
     }
+
+    public function storeUser(Request $request)
+    {
+        $request->validate([
+            'name' => 'nullable|string|max:255',
+            'email' => 'nullable|string|email|max:255|unique:users',
+            'phone' => 'nullable|string|max:15',
+            'google_id' => 'required|string|max:191',
+            'avatar' => 'nullable|string|max:191',
+        ]);
+
+        $user = User::create([
+            'google_id' => $request->google_id,
+            'avatar' => $request->avatar,
+            'name' => $request->name,
+            'phone' => $request->phone,
+            'email' => $request->email,
+        ]);
+
+        return response()->json([
+            'message' => 'User created successfully!',
+            'user' => $user
+        ], 200);
+    }
 }

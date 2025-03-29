@@ -22,6 +22,9 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+//for users
+Route::post('users/store', [UserController::class, 'storeUser']);
+Route::put('users/{userId}', [UserController::class, 'updateUser']);
 
 // api để người dùng vote cho link
 Route::post('users/{userId}/vote/{linkId}', [UserVoteLinkController::class, 'vote']);
@@ -34,8 +37,6 @@ Route::get('links/rank', [UserVoteLinkController::class, 'rankLinks']);
 // api để lấy danh sách rank links
 
 Route::get('links/search', [UserVoteLinkController::class, 'searchLinks']);
-
-Route::put('users/{userId}', [UserController::class, 'updateUser']);
 
 Route::post('/messages', [MessageController::class, 'saveMessage']);
 
