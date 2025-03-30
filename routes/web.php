@@ -17,6 +17,7 @@ use App\Http\Controllers\LinkController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ClanController;
 
+// use App\Http\Controllers\Api\GoogleAuthController;
 
 Route::get('/admin/login', [AdminController::class, 'showLoginForm'])->name('admin.login');
 Route::post('/admin/login', [AdminController::class, 'login']);
@@ -41,3 +42,5 @@ Route::get('/', function () {
 });
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+// Route::get('login/google/callback', [GoogleAuthController::class, 'handleGoogleCallback']);
+// Route::get('login/google', [GoogleAuthController::class, 'redirectToGoogle']);

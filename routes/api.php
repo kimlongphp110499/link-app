@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\UserVoteLinkController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\Api\ClanController;
+use App\Http\Controllers\Api\GoogleAuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,6 +26,10 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 //for users
 Route::post('users/store', [UserController::class, 'storeUser']);
 Route::put('users/{userId}', [UserController::class, 'updateUser']);
+
+//check google_id is valid
+Route::post('/check-google-id', [GoogleAuthController::class, 'checkGoogleId']);
+
 
 // api để người dùng vote cho link
 Route::post('users/{userId}/vote/{linkId}', [UserVoteLinkController::class, 'vote']);
