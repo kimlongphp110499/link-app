@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\UserVoteLinkController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\Api\ClanController;
+use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\TransactionHistoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,3 +43,7 @@ Route::get('links/search', [UserVoteLinkController::class, 'searchLinks']);
 Route::post('/messages', [MessageController::class, 'saveMessage']);
 
 Route::get('clans/top-voter', [ClanController::class, 'getClansWithTopVoter']);
+
+Route::post('/add-points', [PaymentController::class, 'addPoints']);
+
+Route::get('/transaction-history/{user_id}', [TransactionHistoryController::class, 'getHistory']);
