@@ -17,7 +17,8 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $userId,
             'phone' => 'nullable|string|max:15',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Thêm điều kiện cho ảnh
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'nick_name' => 'nullable|string|max:255',
             // 'password' => 'nullable|string|min:6|confirmed',
         ]);
         // Cập nhật thông tin người dùng
@@ -25,16 +26,25 @@ class UserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
+            'nick_name' => $request->nick_name,
             // 'password' => $request->password ? Hash::make($request->password) : $user->password, // Nếu không có mật khẩu mới, giữ nguyên mật khẩu cũ
         ]);
 
         if ($request->hasFile('avatar')) {
+            if ($user->avatar) {
+                // Xóa ảnh cũ từ thư mục
+                $oldAvatarPath = public_path($user->avatar);
+                if (file_exists($oldAvatarPath)) {
+                    unlink($oldAvatarPath);
+                }
+            }
+
             $image = $request->file('avatar');
     
             // Tạo tên ảnh ngẫu nhiên để tránh trùng lặp
             $imageName = time() . '.' . $image->getClientOriginalExtension();
         
-            // Lưu ảnh vào thư mục 'storage/app/public/users'
+            // Lưu ảnh vào thư mục 'storage/app/public/users/avatar'
             $image->storeAs('public/users', $imageName);
         
             // Cập nhật đường dẫn ảnh trong cơ sở dữ liệu
@@ -55,16 +65,16 @@ class UserController extends Controller
             'name' => 'nullable|string|max:255',
             'email' => 'nullable|string|email|max:255|unique:users',
             'phone' => 'nullable|string|max:15',
-            'google_id' => 'required|string|max:191',
             'avatar' => 'nullable|string|max:191',
+            'nick_name' => 'nullable|string|max:191',
         ]);
 
         $user = User::create([
-            'google_id' => $request->google_id,
             'avatar' => $request->avatar,
             'name' => $request->name,
             'phone' => $request->phone,
             'email' => $request->email,
+            'nick_name' => $request->nick_name,
         ]);
 
         return response()->json([
