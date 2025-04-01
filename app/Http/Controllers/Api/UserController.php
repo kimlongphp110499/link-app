@@ -17,9 +17,9 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $userId,
             'phone' => 'nullable|string|max:15',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Thêm điều kiện cho ảnh
             // 'password' => 'nullable|string|min:6|confirmed',
         ]);
-
         // Cập nhật thông tin người dùng
         $user->update([
             'name' => $request->name,
@@ -27,6 +27,21 @@ class UserController extends Controller
             'phone' => $request->phone,
             // 'password' => $request->password ? Hash::make($request->password) : $user->password, // Nếu không có mật khẩu mới, giữ nguyên mật khẩu cũ
         ]);
+
+        if ($request->hasFile('avatar')) {
+            $image = $request->file('avatar');
+    
+            // Tạo tên ảnh ngẫu nhiên để tránh trùng lặp
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+        
+            // Lưu ảnh vào thư mục 'storage/app/public/users'
+            $image->storeAs('public/users', $imageName);
+        
+            // Cập nhật đường dẫn ảnh trong cơ sở dữ liệu
+            $user->update([
+                'avatar' => 'storage/users/' . $imageName, // Lưu đường dẫn tương đối từ thư mục public
+            ]);
+        }
 
         return response()->json([
             'message' => 'User updated successfully!',
