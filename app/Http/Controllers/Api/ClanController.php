@@ -43,7 +43,7 @@ class ClanController extends Controller
                 'clan_name' => $clan->name,
                 'total_points' => $totalPoints,
                 'top_voter' => $topVoterName,
-                'top_voter_points' => $topVoterPoints,
+                'top_voter_points' => (int) $topVoterPoints,
             ];
         }
 
