@@ -1,5 +1,21 @@
 @extends('adminlte::page')
-
+@push('css')
+<style>
+    .table th, .table td {
+        vertical-align: middle;
+    }
+    .clan-tag {
+        display: inline-flex;
+        align-items: center;
+        background-color: #007bff; /* Màu xám nhạt giống ảnh */
+        color: #ffff; /* Chữ đen */
+        padding: 2px 6px;
+        margin: 2px;
+        border-radius: 3px;
+        font-size: 0.9em;
+    }
+</style>
+@endpush
 @section('title', 'Manage Links')
 
 @section('content_header')
@@ -28,27 +44,14 @@
             <span title="{{ $link->url }}">{{ Str::limit($link->url, 50) }}</span>
           </td>
           <td>
-            @if ($link->clan)
-              {{ $link->clan->name }}
+            @if ($link->clans->isNotEmpty())
+                @foreach ($link->clans as $clan)
+                    <span class="clan-tag">
+                        {{ $clan->name }}
+                    </span>
+                @endforeach
             @else
-              <form action="{{ route('admin.links.assign-clan', $link->id) }}"
-                    method="POST"
-                    style="display:inline;">
-                @csrf
-                <div class="input-group">
-                  <select name="clan_id"
-                          class="form-control">
-                    <option value=""></option>
-                    @foreach ($clans as $clan)
-                      <option value="{{ $clan->id }}">{{ $clan->name }}</option>
-                    @endforeach
-                  </select>
-                  <div class="input-group-append">
-                    <button type="submit"
-                            class="btn btn-primary">Assign Clan</button>
-                  </div>
-                </div>
-              </form>
+                <span class="text-muted">No Clan Assigned</span>
             @endif
           </td>
           <td>

@@ -17,8 +17,8 @@ class Clan extends Model
         return $this->hasMany(ClanPointHistory::class);
     }
 
-    public function link()
+    public function links()
     {
-        return $this->hasOne(Link::class);
+        return $this->belongsToMany(Link::class, 'clan_link', 'clan_id', 'link_id');
     }
 }

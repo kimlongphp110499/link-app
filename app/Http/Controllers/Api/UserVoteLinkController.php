@@ -53,8 +53,10 @@ class UserVoteLinkController extends Controller
 
         // vote cho clan
         $addPointsToClan = false;
-        if($link->clan_id) {
-            $addPointsToClan = $this->addPointsToClan($request, $userId, $linkId);
+        if($link->clans) {
+            foreach($link->clans as $clan) {
+                $addPointsToClan = $this->addPointsToClan($request, $userId, $clan->id);
+            }
         }
 
         return response()->json([

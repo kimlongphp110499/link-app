@@ -36,6 +36,18 @@
       @enderror
     </div>
     <div class="form-group">
+      <label for="points">Points</label>
+      <input id="points"
+             type="number"
+             class="form-control"
+             name="points"
+             value="{{ old('points', $user->points) }}"
+             >
+      @error('points')
+        <div class="text-danger">{{ $message }}</div>
+      @enderror
+    </div>
+    <div class="form-group">
       <label for="password">Password (Leave blank to keep unchanged)</label>
       <input id="password"
              type="password"

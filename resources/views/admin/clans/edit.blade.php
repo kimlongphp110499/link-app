@@ -30,7 +30,7 @@
              class="form-control"
              name="points"
              value="{{ $clan->points }}"
-             readonly>
+             >
       @error('points')
         <div class="text-danger">{{ $message }}</div>
       @enderror
