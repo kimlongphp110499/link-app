@@ -14,14 +14,14 @@ class PaymentController extends Controller
      */
     public function addPoints(Request $request)
     {
+        $auth =  auth()->user();
         // Xác thực dữ liệu đầu vào
         $request->validate([
-            'user_id' => 'required|exists:users,id', // Kiểm tra người dùng có tồn tại
             'amount' => 'required|integer|min:1', // Kiểm tra số tiền nạp
         ]);
 
         // Lấy người dùng
-        $user = User::findOrFail($request->user_id);
+        $user = User::findOrFail($auth->id);
 
         // Cập nhật số điểm (nạp tiền)
         $user->points += $request->amount;

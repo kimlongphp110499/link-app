@@ -7,7 +7,7 @@ use Google_Client;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Laravel\Socialite\Facades\Socialite;
+use Laravel\Sanctum\Sanctum;
 
 class GoogleAuthController extends Controller
 {
@@ -23,72 +23,40 @@ class GoogleAuthController extends Controller
         ]);
 
         $idToken = $request->input('id_token');
+    
+        $client = new Google_Client(['client_id' => env('GOOGLE_CLIENT_ID')]);
 
         try {
-            $googleUser = Socialite::driver('google')->userFromToken($idToken);
-            return response()->json([
-                'id' => $googleUser->id,
-                'email' => $googleUser->email,
-                'name' => $googleUser->name,
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 401);
-        }
+            $payload = $client->verifyIdToken($idToken);
+
+            if ($payload) {
+                $googleId = $payload['sub'];
+                $email = $payload['email'];
+                $name = $payload['name'];
+                $avatar = $payload['picture'];
+
+                $user = User::updateOrCreate(
+                    ['google_id' => $googleId],
+                    [
+                        'name' => $name,
+                        'email' => $email,
+                        'avatar' => $avatar,
+                    ]
+                );
     
-        // $client = new Google_Client(['client_id' => env('GOOGLE_CLIENT_ID')]);
+                $token = $user->createToken('auth_token')->plainTextToken;
 
-        // try {
-        //     $payload = $client->verifyIdToken($idToken);
+                return response()->json([
+                    'access_token' => $token,
+                    'user' => $user,
+                ], 200);
+            }
 
-        //     if ($payload) {
-        //         $googleId = $payload['sub'];
-        //         $email = $payload['email'];
-        //         $name = $payload['name'];
+            return response()->json(['message' => 'Invalid ID token'], 400);
 
-        //         $user = User::firstOrCreate(
-        //             ['google_id' => $googleId],
-        //             ['name' => $name, 'email' => $email]
-        //         );
+        } catch (\Exception $e) {
 
-        //         Auth::login($user);
-
-        //         return response()->json([
-        //             'message' => 'User authenticated successfully',
-        //             'user' => $user
-        //         ]);
-        //     }
-
-        //     return response()->json(['message' => 'Invalid ID token'], 400);
-
-        // } catch (\Exception $e) {
-        //     dd($e);
-        //     return response()->json(['message' => 'Error verifying token'], 500);
-        // }
+            return response()->json(['message' => 'Error verifying token'], 500);
+        }
     }
-
-    // public function authenticate_c(Request $request)
-    // {
-    //       // Lấy Access Token từ request
-    //       $accessToken = $request->input('access_token');
-
-    //       // Gửi yêu cầu tới Google People API để lấy thông tin người dùng
-    //       $url = 'https://www.googleapis.com/oauth2/v3/userinfo?access_token=' . $accessToken;
-  
-    //       // Gửi GET request để lấy thông tin người dùng
-    //       $response = file_get_contents($url);
-  
-    //       // Chuyển đổi dữ liệu JSON thành mảng PHP
-    //       $userInfo = json_decode($response, true);
-  
-    //       // Kiểm tra nếu có lỗi từ Google API
-    //       if (isset($userInfo['error'])) {
-    //           return response()->json(['message' => 'Error retrieving user info', 'error' => $userInfo['error']], 400);
-    //       }
-  
-    //       // Nếu không có lỗi, trả về thông tin người dùng
-    //       return response()->json([
-    //           'message' => 'User authenticated successfully',
-    //           'user' => $userInfo
-    //       ]);
-    // }
 }

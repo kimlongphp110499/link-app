@@ -8,9 +8,10 @@ use App\Models\User;
 
 class UserController extends Controller
 {
-    public function updateUser(Request $request, $userId)
+    public function updateUser(Request $request)
     {
-        $user = User::findOrFail($userId);
+        $auth =  auth()->user();
+        $user = User::findOrFail($auth->id);
 
         // Xác thực dữ liệu đầu vào
         $request->validate([

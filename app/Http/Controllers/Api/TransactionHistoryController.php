@@ -11,10 +11,12 @@ class TransactionHistoryController extends Controller
     /**
      * Lấy lịch sử giao dịch nạp tiền của người dùng
      */
-    public function getHistory($userId)
+    public function getHistory()
     {
+        $user =  auth()->user();
+        
         // Lấy lịch sử giao dịch của người dùng từ bảng transaction_histories
-        $transactions = TransactionHistory::where('user_id', $userId)
+        $transactions = TransactionHistory::where('user_id', $user->id)
                                           ->orderBy('created_at', 'desc')
                                           ->get();
 
