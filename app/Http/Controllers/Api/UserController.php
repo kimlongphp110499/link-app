@@ -15,7 +15,6 @@ class UserController extends Controller
         // Xác thực dữ liệu đầu vào
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $userId,
             'phone' => 'nullable|string|max:15',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'nick_name' => 'nullable|string|max:255',
@@ -24,7 +23,6 @@ class UserController extends Controller
         // Cập nhật thông tin người dùng
         $user->update([
             'name' => $request->name,
-            'email' => $request->email,
             'phone' => $request->phone,
             'nick_name' => $request->nick_name,
             // 'password' => $request->password ? Hash::make($request->password) : $user->password, // Nếu không có mật khẩu mới, giữ nguyên mật khẩu cũ
