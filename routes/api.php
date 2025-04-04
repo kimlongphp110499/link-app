@@ -38,13 +38,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('users/vote-history', [UserVoteLinkController::class, 'voteHistory']);
     
     Route::get('clans/top-voter', [ClanController::class, 'getClansWithTopVoter']);
-    // api để lấy danh sách rank links
-    Route::get('links/rank', [UserVoteLinkController::class, 'rankLinks']);
+
     Route::get('links/search', [UserVoteLinkController::class, 'searchLinks']);
 });
 
 Route::post('/messages', [MessageController::class, 'saveMessage']);
-
+// api để lấy danh sách rank links
+Route::get('links/rank', [UserVoteLinkController::class, 'rankLinks']);
 
 
 Route::post('/auth/google', [GoogleAuthController::class, 'authenticate']);
