@@ -12,14 +12,16 @@ use App\Models\Clan;
 class UserVoteLinkController extends Controller
 {
     // Phương thức vote cho link
-    public function vote(Request $request, $userId, $linkId)
+    public function vote(Request $request, $linkId)
     {
+        $auth =  auth()->user();
+        $user = User::findOrFail($auth->id);
+
         $request->validate([
             'points' => 'required|integer|min:1',
         ]);
 
         // Kiểm tra nếu user tồn tại
-        $user = User::findOrFail($userId);
         if (!$user) {
             return response()->json(['message' => 'User not found'], 404);
         }
@@ -54,7 +56,7 @@ class UserVoteLinkController extends Controller
         // vote cho clan
         $addPointsToClan = false;
         if($link->clan_id) {
-            $addPointsToClan = $this->addPointsToClan($request, $userId, $linkId);
+            $addPointsToClan = $this->addPointsToClan($request, $auth->id, $linkId);
         }
 
         return response()->json([
@@ -68,10 +70,11 @@ class UserVoteLinkController extends Controller
     }
 
     // Lịch sử vote của người dùng
-    public function voteHistory($userId)
+    public function voteHistory()
     {
+        $auth =  auth()->user();
         // Kiểm tra nếu user tồn tại, nếu không trả về lỗi 404
-        $user = User::find($userId);
+        $user = User::find($auth->id);
         if (!$user) {
             return response()->json(['message' => 'User not found'], 404);
         }

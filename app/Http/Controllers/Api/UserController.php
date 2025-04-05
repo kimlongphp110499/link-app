@@ -8,9 +8,10 @@ use App\Models\User;
 
 class UserController extends Controller
 {
-    public function updateUser(Request $request, $userId)
+    public function updateUser(Request $request)
     {
-        $user = User::findOrFail($userId);
+        $auth =  auth()->user();
+        $user = User::findOrFail($auth->id);
 
         // Xác thực dữ liệu đầu vào
         $request->validate([
@@ -79,5 +80,12 @@ class UserController extends Controller
             'message' => 'User created successfully!',
             'user' => $user
         ], 200);
+    }
+
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json(['message' => 'Logged out successfully'], 200);
     }
 }
