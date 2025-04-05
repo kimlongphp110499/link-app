@@ -31,6 +31,7 @@
       <tr>
         <th>Title</th>
         <th>URL</th>
+        <th>Video ID</th>
         <th>Assigned Clan</th>
         <th>Actions</th>
       </tr>
@@ -43,6 +44,7 @@
             <!-- Giới hạn độ dài URL hiển thị -->
             <span title="{{ $link->url }}">{{ Str::limit($link->url, 50) }}</span>
           </td>
+          <td>{{ $link->video_id }}</td>
           <td>
             @if ($link->clans->isNotEmpty())
                 @foreach ($link->clans as $clan)

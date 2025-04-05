@@ -156,7 +156,7 @@ class UserVoteLinkController extends Controller
         if ($query) {
             // Tìm kiếm các link theo tiêu đề hoặc URL
             $links = Link::where('title', 'like', '%' . $query . '%')
-                ->orWhere('id', '=', $query)
+                ->orWhere('video_id', 'like', '%' . $query . '%')
                 ->get();
         } else {
             // Nếu không có query, trả về tất cả các link

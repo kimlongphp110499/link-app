@@ -28,11 +28,13 @@ class LinkController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'url' => 'required|url',
+            'video_id' => 'required|string|max:100',
         ]);
 
         Link::create([
             'title' => $request->title,
             'url' => $request->url,
+            'video_id' => $request->video_id,
         ]);
 
         return redirect()->route('admin.links.index')->with('success', 'Link created successfully!');
@@ -53,6 +55,7 @@ class LinkController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'url' => 'required|url',
+            'video_id' => 'required|string|max:100',
             'clan_ids' => 'nullable|array',
         ]);
 
@@ -60,6 +63,7 @@ class LinkController extends Controller
         $link->update([
             'title' => $request->title,
             'url' => $request->url,
+            'video_id' => $request->video_id,
         ]);
         $link->clans()->sync($request->clan_ids);
 
