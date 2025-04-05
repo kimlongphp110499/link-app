@@ -40,6 +40,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('clans/top-voter', [ClanController::class, 'getClansWithTopVoter']);
 
     Route::get('links/search', [UserVoteLinkController::class, 'searchLinks']);
+
+    //logout
+    Route::post('/logout', [AuthController::class, 'logout']);
 });
 
 Route::post('/messages', [MessageController::class, 'saveMessage']);
