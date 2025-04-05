@@ -11,8 +11,8 @@ class LinkController extends Controller
     // Hiển thị danh sách links
     public function index()
     {
-        $links = Link::paginate(20);
-        $clans = Clan::doesntHave('link')->get(); 
+        $links = Link::with('clans')->paginate(20);
+        $clans = Clan::all();
         return view('admin.links.index', compact('links', 'clans'));
     }
 
@@ -28,11 +28,13 @@ class LinkController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'url' => 'required|url',
+            'video_id' => 'required|string|max:100',
         ]);
 
         Link::create([
             'title' => $request->title,
             'url' => $request->url,
+            'video_id' => $request->video_id,
         ]);
 
         return redirect()->route('admin.links.index')->with('success', 'Link created successfully!');
@@ -42,11 +44,9 @@ class LinkController extends Controller
     public function edit($id)
     {
         $link = Link::findOrFail($id);
-        $clans = Clan::whereDoesntHave('link', function ($query) use ($link) {
-            $query->where('id', '!=', $link->id);
-        })->get();
-
-        return view('admin.links.edit', compact('link', 'clans'));
+        $clans = Clan::all();
+        $selectedClans = $link->clans->pluck('id')->toArray();
+        return view('admin.links.edit', compact('link', 'clans', 'selectedClans'));
     }
 
     // Cập nhật thông tin link
@@ -55,15 +55,18 @@ class LinkController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'url' => 'required|url',
-            'clan_id' => 'nullable|exists:clans,id',
+            'video_id' => 'required|string|max:100',
+            'clan_ids' => 'nullable|array',
         ]);
 
         $link = Link::findOrFail($id);
         $link->update([
             'title' => $request->title,
             'url' => $request->url,
-            'clan_id' => $request->clan_id,
+            'video_id' => $request->video_id,
         ]);
+        $link->clans()->sync($request->clan_ids);
+
 
         return redirect()->route('admin.links.index')->with('success', 'Link updated successfully!');
     }
@@ -79,25 +82,11 @@ class LinkController extends Controller
     public function assignClan(Request $request, $linkId)
     {
         $request->validate([
-            'clan_id' => 'required|exists:clans,id',
+            'clan_ids' => 'required|array',
         ]);
-
+    
         $link = Link::findOrFail($linkId);
-        $clan = Clan::findOrFail($request->clan_id);
-
-        // Kiểm tra nếu link đã có clan
-        if ($link->clan) {
-            return redirect()->route('admin.links.index')->with('error', 'This link already has a clan assigned.');
-        }
-
-        // Kiểm tra nếu clan đã được gắn cho link khác
-        if ($clan->link) {
-            return redirect()->route('admin.links.index')->with('error', 'This clan is already assigned to another link.');
-        }
-
-        // Gắn clan cho link
-        $link->clan()->associate($clan);
-        $link->save();
+        $link->clans()->sync($request->clan_ids);
 
         return redirect()->route('admin.links.index')->with('success', 'Clan assigned to link successfully!');
     }

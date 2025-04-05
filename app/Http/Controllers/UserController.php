@@ -52,14 +52,16 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $id,
-            'password' => 'nullable|string|min:8|confirmed',
+            'points' => 'required|integer|min:0',
+            // 'password' => 'nullable|string|min:8|confirmed',
         ]);
 
         $user = User::findOrFail($id);
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => $request->password ? Hash::make($request->password) : $user->password,
+            'points' => $request->points,
+            // 'password' => $request->password ? Hash::make($request->password) : $user->password,
         ]);
 
         return redirect()->route('admin.users.index')->with('success', 'User updated successfully!');

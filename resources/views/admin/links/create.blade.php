@@ -34,6 +34,18 @@
         <div class="text-danger">{{ $message }}</div>
       @enderror
     </div>
+    <div class="form-group">
+      <label for="video_id">Video ID</label>
+      <input id="video_id"
+             type="text"
+             class="form-control"
+             name="video_id"
+             value="{{ old('video_id') }}"
+             required>
+      @error('video_id')
+        <div class="text-danger">{{ $message }}</div>
+      @enderror
+    </div>
     <button type="submit"
             class="btn btn-primary">Save Link</button>
   </form>
