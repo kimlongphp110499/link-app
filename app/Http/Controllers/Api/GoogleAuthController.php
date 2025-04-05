@@ -35,21 +35,30 @@ class GoogleAuthController extends Controller
                 $name = $payload['name'];
                 $avatar = $payload['picture'];
 
-                $user = User::updateOrCreate(
-                    ['google_id' => $googleId],
-                    [
+                $user = User::where('google_id', $googleId)->first();
+
+                if ($user) {
+                    $token = $user->createToken('auth_token')->plainTextToken;
+
+                    return response()->json([
+                        'access_token' => $token,
+                        'user' => $user,
+                    ], 200);
+                } else {
+                    $user = User::create([
+                        'google_id' => $googleId,
                         'name' => $name,
                         'email' => $email,
                         'avatar' => $avatar,
-                    ]
-                );
-    
-                $token = $user->createToken('auth_token')->plainTextToken;
+                    ]);
+        
+                    $token = $user->createToken('auth_token')->plainTextToken;
 
-                return response()->json([
-                    'access_token' => $token,
-                    'user' => $user,
-                ], 200);
+                    return response()->json([
+                        'access_token' => $token,
+                        'user' => $user,
+                    ], 200);
+                }
             }
 
             return response()->json(['message' => 'Invalid ID token'], 400);

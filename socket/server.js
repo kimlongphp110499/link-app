@@ -30,12 +30,13 @@ io.on('connection', (socket) => {
   console.log('User connected');
 
   // Lưu thông tin người dùng khi kết nối
-  let user_id, user_name;
+  let user_id, user_name, avatar;
 
   // Lắng nghe sự kiện 'user_info' từ client để lưu thông tin người dùng
   socket.on('user_info', (data) => {
     user_id = data.user_id;
     user_name = data.user_name;
+    avatar = data.avatar;
     console.log('User info received:', user_id, user_name);
   });
 
@@ -55,10 +56,10 @@ io.on('connection', (socket) => {
     console.log('Message received:', data);
 
     // Truyền tin nhắn tới tất cả người dùng trong room "default"
-    io.to('default').emit('message', { message: data, user_id: user_id, user_name: user_name });
+    io.to('default').emit('message', { message: data, user_id: user_id, user_name: user_name, avatar: avatar });
 
     // Lưu tin nhắn vào Redis (tùy chọn)
-    const messageData = { message: data, user_id: user_id, user_name: user_name, timestamp: Date.now() };
+    const messageData = { message: data, user_id: user_id, user_name: user_name, avatar: avatar, timestamp: Date.now() };
     redis.lpush('chat:messages', JSON.stringify(messageData)); // Lưu vào Redis với key "chat:messages"
   });
 
@@ -79,7 +80,7 @@ cron.schedule('* * * * *', () => {
     }
     messages.forEach((message) => {
       const parsedMessage = JSON.parse(message);
-      if (Date.now() - parsedMessage.timestamp > 60 * 60 * 1000) {
+      if (Date.now() - parsedMessage.timestamp > 120 * 60 * 1000) {
         // Nếu tin nhắn đã quá 10 phút, xóa tin nhắn khỏi Redis
         redis.lrem('chat:messages', 0, message, (err, response) => {
           if (err) {

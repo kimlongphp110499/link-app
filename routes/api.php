@@ -42,7 +42,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('links/search', [UserVoteLinkController::class, 'searchLinks']);
 
     //logout
-    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/logout', [UserController::class, 'logout']);
 });
 
 Route::post('/messages', [MessageController::class, 'saveMessage']);
