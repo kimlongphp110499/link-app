@@ -55,8 +55,10 @@ class UserVoteLinkController extends Controller
 
         // vote cho clan
         $addPointsToClan = false;
-        if($link->clan_id) {
-            $addPointsToClan = $this->addPointsToClan($request, $auth->id, $linkId);
+        if($link->clans) {
+            foreach($link->clans as $clan) {
+                $addPointsToClan = $this->addPointsToClan($request, $auth->id, $clan->id);
+            }
         }
 
         return response()->json([
@@ -157,7 +159,7 @@ class UserVoteLinkController extends Controller
         if ($query) {
             // Tìm kiếm các link theo tiêu đề hoặc URL
             $links = Link::where('title', 'like', '%' . $query . '%')
-                ->orWhere('id', '=', $query)
+                ->orWhere('video_id', 'like', '%' . $query . '%')
                 ->get();
         } else {
             // Nếu không có query, trả về tất cả các link
