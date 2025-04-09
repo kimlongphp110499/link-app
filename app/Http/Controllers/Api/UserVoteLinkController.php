@@ -27,7 +27,7 @@ class UserVoteLinkController extends Controller
         }
 
         // Kiểm tra nếu link tồn tại
-        $link = Link::findOrFail($linkId);
+        $link = Link::where('video_id', $linkId)->first();
 
         if (!$link) {
             return response()->json(['message' => 'Link not found'], 404);
