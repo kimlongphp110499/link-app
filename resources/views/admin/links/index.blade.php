@@ -1,5 +1,6 @@
 @extends('adminlte::page')
 @push('css')
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <style>
     .table th, .table td {
         vertical-align: middle;
@@ -15,6 +16,66 @@
         font-size: 0.9em;
     }
 </style>
+<style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #f4f4f9;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Button styles */
+        .control-button {
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            outline: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Start state */
+        .start {
+            background: linear-gradient(45deg, #28a745, #34c759);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .start:hover {
+            background: linear-gradient(45deg, #34c759, #28a745);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.5);
+        }
+
+        /* Stop state */
+        .stop {
+            background: linear-gradient(45deg, #dc3545, #ff4d4d);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+        }
+
+        .stop:hover {
+            background: linear-gradient(45deg, #ff4d4d, #dc3545);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(220, 53, 69, 0.5);
+        }
+
+        /* Icon animation */
+        .control-button i {
+            transition: transform 0.3s ease;
+        }
+
+        .control-button:hover i {
+            transform: scale(1.2);
+        }
+    </style>
 @endpush
 @section('title', 'Manage Links')
 
@@ -24,7 +85,12 @@
 
 @section('content')
   <a href="{{ route('admin.links.create') }}"
-     class="btn btn-success mb-3">Add New Link</a>
+     class="control-button start mb-3">Add New Link</a>
+    <button id="control-button" class="control-button @if($checkSchedule > 0) stop @else start @endif mb-3">
+      <i class="@if($checkSchedule > 0) fas fa-pause @else fas fa-play @endif"></i> @if($checkSchedule > 0) Stop @else Start @endif
+    </button>
+
+    <p id="status"></p>
 
   <table class="table-striped table-bordered table">
     <thead>
@@ -75,3 +141,54 @@
   {{ $links->links() }}
 
 @stop
+@section('js')
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script>
+        let isPlaying = @json(!empty($checkSchedule) && $checkSchedule > 0);
+        const controlButton = document.getElementById('control-button');
+        const status = document.getElementById('status');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        controlButton.addEventListener('click', () => {
+            const newValue = !isPlaying; // true nếu Start, false nếu Stop
+
+            // Gửi request để sửa file .env
+            fetch('/admin/video-status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                },
+                body: JSON.stringify({
+                    key: 'VIDEO_PLAYING',
+                    value: newValue.toString(),
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                status.textContent = data.message;
+
+                // Cập nhật giao diện button
+                if (isPlaying) {
+                    // Chuyển sang trạng thái "Start"
+                    controlButton.classList.remove('stop');
+                    controlButton.classList.add('start');
+                    controlButton.innerHTML = '<i class="fas fa-play"></i> Start';
+                    isPlaying = false;
+                } else {
+                    // Chuyển sang trạng thái "Stop"
+                    controlButton.classList.remove('start');
+                    controlButton.classList.add('stop');
+                    controlButton.innerHTML = '<i class="fas fa-pause"></i> Stop';
+                    isPlaying = true;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                status.textContent = 'Error updating video state';
+            });
+        });
+    </script>
+</body>
+</html>
+    @stop

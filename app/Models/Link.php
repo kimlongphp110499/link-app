@@ -9,7 +9,7 @@ class Link extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'url', 'total_votes', 'clan_id', 'video_id'];
+    protected $fillable = ['title', 'url', 'total_votes', 'clan_id', 'video_id', 'duration'];
 
     public function voteHistories()
     {

@@ -9,7 +9,7 @@ use App\Http\Controllers\Api\ClanController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\TransactionHistoryController;
 use App\Http\Controllers\Api\GoogleAuthController;
-
+use App\Http\Controllers\VideoController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -51,3 +51,6 @@ Route::get('links/rank', [UserVoteLinkController::class, 'rankLinks']);
 
 
 Route::post('/auth/google', [GoogleAuthController::class, 'authenticate']);
+
+//for api
+Route::get('/current-video', [VideoController::class, 'getCurrentVideo']);

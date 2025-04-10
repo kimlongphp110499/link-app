@@ -33,6 +33,10 @@ Route::name('admin.')->middleware('auth:admin')->prefix('admin')->group(function
     Route::post('clans/{clanId}/add-points', [ClanController::class, 'addPoints']);
     Route::post('links/{linkId}/assign-clan', [LinkController::class, 'assignClan'])->name('links.assign-clan');
 
+    Route::get('/schedules', [ScheduleController::class, 'index'])->name('schedules.index');
+    Route::post('/schedules', [ScheduleController::class, 'store'])->name('schedules.store');
+    Route::post('/video-status', [LinkController::class, 'videoStatus']);
+
 });
 Route::resource('admin', AdminController::class)->middleware('auth:admin');
 
