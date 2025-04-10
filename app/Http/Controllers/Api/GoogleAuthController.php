@@ -24,7 +24,13 @@ class GoogleAuthController extends Controller
 
         $idToken = $request->input('id_token');
     
-        $client = new Google_Client(['client_id' => env('GOOGLE_CLIENT_ID')]);
+        $platform = $request->header('X-Platform');
+
+        if (strtolower($platform) === 'ios') {
+            $client = new Google_Client(['client_id' => env('GOOGLE_IOS_CLIENT_ID')]);
+        } else {
+            $client = new Google_Client(['client_id' => env('GOOGLE_CLIENT_ID')]);
+        }
 
         try {
             $payload = $client->verifyIdToken($idToken);

@@ -71,7 +71,7 @@
     </div>
     <div class="form-group">
       <label for="clan">Assign Clan</label>
-      <select name="clan_ids[]" id="clan_ids" multiple required  class="form-control">
+      <select name="clan_ids[]" id="clan_ids" multiple  class="form-control">
             @foreach ($clans as $clan)
                 <option value="{{ $clan->id }}" {{ in_array($clan->id, $selectedClans) ? 'selected' : '' }}>
                     {{ $clan->name }}
@@ -82,6 +82,21 @@
         <div class="text-danger">{{ $message }}</div>
       @enderror
     </div>
+    <div class="form-group">
+        <label for="duration">Duration (seconds)</label>
+        <div class="input-group">
+            <input type="number" name="duration" class="form-control" id="duration" value="{{ $link->duration }}" min="1" required>
+            <div class="input-group-append">
+                <span class="input-group-text" id="duration-display">
+                    @php
+                        $minutes = floor($link->duration / 60);
+                        $seconds = $link->duration % 60;
+                        echo $minutes . ':' . ($seconds < 10 ? '0' : '') . $seconds;
+                    @endphp
+                </span>
+            </div>
+        </div>
+    </div>
     <button type="submit"
             class="btn btn-warning">Update Link</button>
   </form>
@@ -91,6 +106,14 @@
   <script>
     $(document).ready(function() {
         $('#clan_ids').select2();
+    });
+
+    $('#duration').on('input', function() {
+        const seconds = parseInt($(this).val()) || 0;
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        const formattedTime = `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+        $('#duration-display').text(formattedTime);
     });
 </script>
 @stop

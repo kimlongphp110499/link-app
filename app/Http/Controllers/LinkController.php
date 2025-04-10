@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Link;
 use Illuminate\Http\Request;
 use App\Models\Clan;
+use App\Models\Schedule;
+use Illuminate\Support\Facades\Log;
 
 class LinkController extends Controller
 {
@@ -13,7 +15,9 @@ class LinkController extends Controller
     {
         $links = Link::with('clans')->paginate(20);
         $clans = Clan::all();
-        return view('admin.links.index', compact('links', 'clans'));
+        $checkSchedule = Schedule::count();
+
+        return view('admin.links.index', compact('links', 'clans', 'checkSchedule'));
     }
 
     // Hiển thị form tạo link
@@ -29,12 +33,14 @@ class LinkController extends Controller
             'title' => 'required|string|max:255',
             'url' => 'required|url',
             'video_id' => 'required|string|max:100',
+            'duration' => 'required|integer|min:1',
         ]);
 
         Link::create([
             'title' => $request->title,
             'url' => $request->url,
             'video_id' => $request->video_id,
+            'duration' => $request->duration,
         ]);
 
         return redirect()->route('admin.links.index')->with('success', 'Link created successfully!');
@@ -57,6 +63,7 @@ class LinkController extends Controller
             'url' => 'required|url',
             'video_id' => 'required|string|max:100',
             'clan_ids' => 'nullable|array',
+            'duration' => 'required|integer|min:1',
         ]);
 
         $link = Link::findOrFail($id);
@@ -64,6 +71,7 @@ class LinkController extends Controller
             'title' => $request->title,
             'url' => $request->url,
             'video_id' => $request->video_id,
+            'duration' => $request->duration,
         ]);
         $link->clans()->sync($request->clan_ids);
 
@@ -89,6 +97,45 @@ class LinkController extends Controller
         $link->clans()->sync($request->clan_ids);
 
         return redirect()->route('admin.links.index')->with('success', 'Clan assigned to link successfully!');
+    }
+
+    public function videoStatus(Request $request)
+    {
+        $request->validate([
+            'key' => 'required|string',
+            'value' => 'required|string',
+        ]);
+
+        $key = strtoupper($request->key);
+        $value = $request->value;
+
+        try {
+            if($value == 'true') {
+                // Lấy danh sách links, ưu tiên theo total_votes, nếu bằng nhau thì lấy theo id (mới nhất)
+                $videos = Link::orderBy('total_votes', 'desc')
+                ->orderBy('id', 'desc')
+                ->get();
+
+                if ($videos->isEmpty()) {
+                    Log::warning("No videos found to schedule");
+                    return;
+                }
+
+                // Chỉ thêm 1 video (video có votes cao nhất, hoặc mới nhất nếu votes bằng nhau)
+                $firstVideo = $videos->first();
+                Schedule::create([
+                    'link_id' => $firstVideo->id,
+                    'start_time' => now(),
+                ]);
+            } else {
+                Schedule::truncate();
+            }
+
+            return response()->json(['message' => 'Environment variable updated successfully']);
+        } catch (\Exception $e) {
+            Log::error("Error updating .env: " . $e->getMessage());
+            return response()->json(['message' => 'Error updating .env file'], 500);
+        }
     }
 }
 
