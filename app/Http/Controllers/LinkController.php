@@ -112,19 +112,23 @@ class LinkController extends Controller
         try {
             if($value == 'true') {
                 // Lấy danh sách links, ưu tiên theo total_votes, nếu bằng nhau thì lấy theo id (mới nhất)
-                $videos = Link::orderBy('total_votes', 'desc')
-                ->orderBy('id', 'desc')
-                ->get();
+                $video = Link::where('total_votes', '>', 0)
+                    ->orderBy('total_votes', 'desc')
+                    ->orderBy('id', 'desc')
+                    ->first();
 
-                if ($videos->isEmpty()) {
+                if (!$video) {
+                    $video = Link::inRandomOrder()->first();
+                }
+
+                if (!$video) {
                     Log::warning("No videos found to schedule");
                     return;
                 }
 
                 // Chỉ thêm 1 video (video có votes cao nhất, hoặc mới nhất nếu votes bằng nhau)
-                $firstVideo = $videos->first();
                 Schedule::create([
-                    'link_id' => $firstVideo->id,
+                    'link_id' => $video->id,
                     'start_time' => now(),
                 ]);
             } else {

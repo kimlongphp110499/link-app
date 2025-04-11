@@ -50,21 +50,26 @@ class UpdateSchedulesCommand extends Command
     protected function updateSchedules($startTime)
     {
         // Lấy danh sách links, ưu tiên theo total_votes, nếu bằng nhau thì lấy theo id (mới nhất)
-        $videos = Link::orderBy('total_votes', 'desc')
+        $video = Link::where('total_votes', '>', 0)
+            ->orderBy('total_votes', 'desc')
             ->orderBy('id', 'desc')
-            ->get();
+            ->first();
 
-        if ($videos->isEmpty()) {
+        if (!$video) {
+            $video = Link::inRandomOrder()->first();
+        }
+    
+        // Nếu vẫn không có video, ghi log và dừng xử lý
+        if (!$video) {
             Log::warning("No videos found to schedule");
             return;
         }
 
         // Chỉ thêm 1 video (video có votes cao nhất, hoặc mới nhất nếu votes bằng nhau)
-        $firstVideo = $videos->first();
         Schedule::create([
-            'link_id' => $firstVideo->id,
+            'link_id' => $video->id,
             'start_time' => $startTime,
         ]);
-        Log::info("Added new schedule for video: " . $firstVideo->title . " with start time: " . $startTime->toIso8601String());
+        Log::info("Added new schedule for video: " . $video->title . " with start time: " . $startTime->toIso8601String());
     }
 }
