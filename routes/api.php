@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\ClanController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\TransactionHistoryController;
 use App\Http\Controllers\Api\GoogleAuthController;
+use App\Http\Controllers\Api\HonorController;
 use App\Http\Controllers\VideoController;
 /*
 |--------------------------------------------------------------------------
@@ -36,10 +37,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('users/vote/{linkId}', [UserVoteLinkController::class, 'vote']);
     // api để lấy lịch sử vote của người dùng
     Route::get('users/vote-history', [UserVoteLinkController::class, 'voteHistory']);
-    
+
     Route::get('clans/top-voter', [ClanController::class, 'getClansWithTopVoter']);
 
     Route::get('links/search', [UserVoteLinkController::class, 'searchLinks']);
+
+    Route::post('honors/index', [HonorController::class, 'index']);
 
     //logout
     Route::post('/logout', [UserController::class, 'logout']);

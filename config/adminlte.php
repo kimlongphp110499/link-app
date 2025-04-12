@@ -345,6 +345,11 @@ return [
             'url' => 'admin/links',
             'icon' => 'fas fa-fw fa-link',
         ],
+        [
+            'text' => 'Honor',
+            'url' => 'admin/honors',
+            'icon' => 'fas fa-solid fa-award',
+        ],
         // ['header' => 'account_settings'],
         // [
         //     'text' => 'profile',
