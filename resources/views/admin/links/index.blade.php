@@ -17,65 +17,55 @@
     }
 </style>
 <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background: #f4f4f9;
-            font-family: Arial, sans-serif;
-        }
+    /* Button styles */
+    .control-button {
+        padding: 15px 30px;
+        font-size: 18px;
+        font-weight: bold;
+        color: white;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        outline: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
 
-        /* Button styles */
-        .control-button {
-            padding: 15px 30px;
-            font-size: 18px;
-            font-weight: bold;
-            color: white;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            outline: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-        }
+    /* Start state */
+    .start {
+        background: linear-gradient(45deg, #28a745, #34c759);
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+    }
 
-        /* Start state */
-        .start {
-            background: linear-gradient(45deg, #28a745, #34c759);
-            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
-        }
+    .start:hover {
+        background: linear-gradient(45deg, #34c759, #28a745);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(40, 167, 69, 0.5);
+    }
 
-        .start:hover {
-            background: linear-gradient(45deg, #34c759, #28a745);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.5);
-        }
+    /* Stop state */
+    .stop {
+        background: linear-gradient(45deg, #dc3545, #ff4d4d);
+        box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+    }
 
-        /* Stop state */
-        .stop {
-            background: linear-gradient(45deg, #dc3545, #ff4d4d);
-            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
-        }
+    .stop:hover {
+        background: linear-gradient(45deg, #ff4d4d, #dc3545);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(220, 53, 69, 0.5);
+    }
 
-        .stop:hover {
-            background: linear-gradient(45deg, #ff4d4d, #dc3545);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(220, 53, 69, 0.5);
-        }
+    /* Icon animation */
+    .control-button i {
+        transition: transform 0.3s ease;
+    }
 
-        /* Icon animation */
-        .control-button i {
-            transition: transform 0.3s ease;
-        }
-
-        .control-button:hover i {
-            transform: scale(1.2);
-        }
-    </style>
+    .control-button:hover i {
+        transform: scale(1.2);
+    }
+</style>
 @endpush
 @section('title', 'Manage Links')
 
