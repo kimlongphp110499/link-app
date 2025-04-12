@@ -16,6 +16,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\LinkController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ClanController;
+use App\Http\Controllers\HonorController;
 
 
 Route::get('/admin/login', [AdminController::class, 'showLoginForm'])->name('admin.login');
@@ -28,6 +29,7 @@ Route::name('admin.')->middleware('auth:admin')->prefix('admin')->group(function
     Route::resource('links', LinkController::class);
     Route::resource('users', UserController::class);
     Route::resource('clans', ClanController::class);
+    Route::resource('honors', HonorController::class);
 
     // Cộng điểm cho clan
     Route::post('clans/{clanId}/add-points', [ClanController::class, 'addPoints']);
