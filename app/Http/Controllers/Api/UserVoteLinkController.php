@@ -9,8 +9,22 @@ use App\Models\VoteHistory;
 use App\Models\ClanPointHistory;
 use App\Models\User;
 use App\Models\Clan;
+use App\Services\LinkService;
+
 class UserVoteLinkController extends Controller
 {
+    protected $linkService;
+
+    /**
+     * Inject LinkService in Controller.
+     *
+     * @param linkService $linkService
+     */
+    public function __construct(LinkService $linkService)
+    {
+        $this->linkService = $linkService;
+    }
+
     // Phương thức vote cho link
     public function vote(Request $request, $linkId)
     {
@@ -103,7 +117,7 @@ class UserVoteLinkController extends Controller
  
          $clan = Clan::findOrFail($clanId);
          $user = User::findOrFail($userId);
-         $pointsAdded = $request->points;
+         $pointsAdded = 1;
  
          // Kiểm tra xem người dùng đã từng cộng điểm cho clan này chưa
         $existingHistory = ClanPointHistory::where('user_id', $user->id)
@@ -130,23 +144,7 @@ class UserVoteLinkController extends Controller
 
     public function rankLinks()
     {
-        // Lấy tất cả các link với tổng điểm vote
-        $links = Link::orderByDesc('total_votes') // Sắp xếp theo tổng số điểm được vote (giảm dần)
-            ->get()
-            ->map(function ($link) {
-                // Lấy user đã vote nhiều điểm nhất cho mỗi link
-                $userWithMaxVotes = $link->voteHistories()
-                    ->selectRaw('user_id, SUM(points_voted) as total_points')
-                    ->groupBy('user_id')
-                    ->orderBy('total_points', 'asc')
-                    ->first(); // Lấy user có tổng điểm vote nhiều nhất
-                
-                // Thêm thông tin user và số điểm vote vào mỗi link
-                $link->user_with_max_votes = $userWithMaxVotes ? User::find($userWithMaxVotes->user_id) : null;
-                $link->user_max_vote_points = $userWithMaxVotes ? $userWithMaxVotes->total_points : 0;
-    
-                return $link;
-            });
+        $links = $this->linkService->videoRank();
     
         return response()->json($links, 200);
     }
@@ -157,9 +155,12 @@ class UserVoteLinkController extends Controller
 
         // Kiểm tra nếu query tồn tại
         if ($query) {
-            // Tìm kiếm các link theo tiêu đề hoặc URL
-            $links = Link::where('title', 'like', '%' . $query . '%')
-                ->orWhere('video_id', 'like', '%' . $query . '%')
+            // Loại bỏ khoảng trắng trong query
+            $normalizedQuery = str_replace(' ', '', $query);
+    
+            // Tìm kiếm các link theo tiêu đề hoặc ID video
+            $links = Link::whereRaw("REPLACE(title, ' ', '') LIKE ?", ["%{$normalizedQuery}%"])
+                ->orWhereRaw("REPLACE(video_id, ' ', '') LIKE ?", ["%{$normalizedQuery}%"])
                 ->get();
         } else {
             // Nếu không có query, trả về tất cả các link
