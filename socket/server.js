@@ -2,7 +2,7 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const Redis = require('ioredis');
-const axios = require('axios');
+const { v4: uuidv4 } = require('uuid'); // Thư viện để tạo UUID (npm install uuid)
 const cron = require('node-cron');
 
 // Tạo một ứng dụng Express
@@ -22,7 +22,7 @@ const io = socketIo(server, {
 // Kết nối Redis
 const redis = new Redis({
   host: 'localhost', // Đây sẽ là tên của container Redis trong Docker Compose
-  port: 6379,    // Cổng mặc định của Redis
+  port: 6379,        // Cổng mặc định của Redis
 });
 
 // Lắng nghe kết nối từ client
@@ -40,12 +40,12 @@ io.on('connection', (socket) => {
     console.log('User info received:', user_id, user_name);
   });
 
+  // Lấy tất cả tin nhắn cũ từ Redis khi người dùng kết nối
   redis.lrange('chat:messages', 0, -1, (err, messages) => {
     if (err) {
       console.error('Error retrieving messages from Redis:', err);
       return;
     }
-    // Gửi tất cả các tin nhắn cũ cho người dùng khi kết nối
     messages.reverse().forEach((message) => {
       socket.emit('message', JSON.parse(message));  // Gửi tin nhắn đã được lưu
     });
@@ -54,13 +54,68 @@ io.on('connection', (socket) => {
   // Lắng nghe sự kiện 'message' từ client
   socket.on('message', (data) => {
     console.log('Message received:', data);
-
-    // Truyền tin nhắn tới tất cả người dùng trong room "default"
-    io.to('default').emit('message', { message: data, user_id: user_id, user_name: user_name, avatar: avatar });
-
-    // Lưu tin nhắn vào Redis (tùy chọn)
-    const messageData = { message: data, user_id: user_id, user_name: user_name, avatar: avatar, timestamp: Date.now() };
-    redis.lpush('chat:messages', JSON.stringify(messageData)); // Lưu vào Redis với key "chat:messages"
+  
+    const messageId = uuidv4();
+  
+    const messageData = {
+      id: messageId,
+      message: data.message,
+      user_id: user_id,
+      user_name: user_name,
+      avatar: avatar,
+      timestamp: Date.now(),
+      reply_to: data.reply_to || null,
+    };
+  
+    if (messageData.reply_to) {
+      redis.lrange('chat:messages', 0, -1, (err, messages) => {
+        if (err) {
+          console.error('Error retrieving messages from Redis:', err);
+          return;
+        }
+  
+        const repliedMessage = messages
+          .map(msg => JSON.parse(msg))
+          .find(msg => msg.id === messageData.reply_to);
+  
+        if (repliedMessage) {
+          messageData.replied_message = {
+            id: repliedMessage.id,
+            message: repliedMessage.message,
+            user_name: repliedMessage.user_name,
+            avatar: repliedMessage.avatar,
+          };
+        }
+  
+        io.to('default').emit('message', messageData);
+        redis.lpush('chat:messages', JSON.stringify(messageData));
+      });
+    } else {
+      io.to('default').emit('message', messageData);
+      redis.lpush('chat:messages', JSON.stringify(messageData));
+    }
+  });
+  
+  // Lắng nghe sự kiện 'send_name' từ client
+  socket.on('send_name', (name) => {
+    console.log(`Name received: ${name}`);
+  
+    const notificationId = uuidv4();
+    const notification = {
+      id: notificationId,
+      name: name,
+      user_id: user_id,
+      user_name: user_name,
+      avatar: avatar,
+      timestamp: Date.now(),
+    };
+  
+    io.emit('show_name', notification);
+  
+    setTimeout(() => {
+      io.emit('remove_name', { id: notificationId });
+      console.log(`Notification with ID ${notificationId} removed`);
+    }, 2000);
   });
 
   // Tham gia vào room "default"
@@ -71,6 +126,8 @@ io.on('connection', (socket) => {
     console.log('User disconnected');
   });
 });
+
+// Cron job để xóa tin nhắn cũ
 cron.schedule('* * * * *', () => {
   console.log('Checking for expired messages...');
   redis.lrange('chat:messages', 0, -1, (err, messages) => {
@@ -81,7 +138,7 @@ cron.schedule('* * * * *', () => {
     messages.forEach((message) => {
       const parsedMessage = JSON.parse(message);
       if (Date.now() - parsedMessage.timestamp > 120 * 60 * 1000) {
-        // Nếu tin nhắn đã quá 10 phút, xóa tin nhắn khỏi Redis
+        // Nếu tin nhắn đã quá 120 phút, xóa tin nhắn khỏi Redis
         redis.lrem('chat:messages', 0, message, (err, response) => {
           if (err) {
             console.error('Error deleting expired message:', err);
@@ -93,6 +150,7 @@ cron.schedule('* * * * *', () => {
     });
   });
 });
+
 // Serve các tài nguyên tĩnh (tùy chọn)
 app.get('/', (req, res) => {
   res.send('Socket.IO server is running');
