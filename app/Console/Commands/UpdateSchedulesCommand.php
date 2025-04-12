@@ -7,7 +7,6 @@ use App\Models\Schedule;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
-use App\Services\LinkService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 
@@ -18,6 +17,15 @@ class UpdateSchedulesCommand extends Command
 
     public function handle()
     {
+        $nextRunTime = Cache::get('next_run_time');
+        if ($nextRunTime) {
+            $now = Carbon::now()->format('Y-m-d H:i:s');
+            if($now < $nextRunTime) {
+                Log::info("chưa đến time run: " . $nextRunTime);
+                return;
+            }
+        }
+
         $now = Carbon::now();
         Log::info("Running UpdateSchedulesCommand at: " . $now->toIso8601String());
 
@@ -25,16 +33,20 @@ class UpdateSchedulesCommand extends Command
         $currentSchedule = Schedule::first();
 
         if (!$currentSchedule) {
+            Log::info("No current schedule found. Exiting command.");
             return;
         }
 
         $startTime = Carbon::parse($currentSchedule->start_time);
-        
-        $elapsedSeconds = $now->diffInSeconds($startTime);
         $videoDuration = $currentSchedule->link->duration;
 
-        // Nếu video hiện tại đã kết thúc (bao gồm 3 giây chờ)
-        if ($elapsedSeconds*-1 >= $videoDuration + 3) {
+        // Tính toán thời gian cron job tiếp theo
+        $nextRunTime = $startTime->copy()->addSeconds($videoDuration - 3);
+        Log::info("Next run time calculated as: " . $nextRunTime->toIso8601String());
+
+        // Nếu đã đến thời điểm chạy tiếp theo
+        if ($now->greaterThanOrEqualTo($nextRunTime)) {
+
             // Reset votes của video vừa phát xong về 0
             $currentLink = $currentSchedule->link;
             $currentLink->update(['total_votes' => 0]);
@@ -54,70 +66,62 @@ class UpdateSchedulesCommand extends Command
 
             // Cập nhật schedules với video tiếp theo
             $this->updateSchedules();
+
+            // Lưu thời gian chạy tiếp theo vào cache
+            $nextRunTime = Carbon::now()->addSeconds($videoDuration - 3);
+            Cache::put('next_run_time', $nextRunTime, 3600);
+            Log::info("Next run time for cron job set to: " . $nextRunTime->toIso8601String());
+
         }
     }
 
     protected function updateSchedules()
     {
-        // Lấy danh sách links, ưu tiên theo total_votes, nếu bằng nhau thì lấy theo id (mới nhất)
-       
-        DB::beginTransaction();
+        $link = DB::selectOne("
+            SELECT id, total_votes, is_played, duration
+            FROM links
+            WHERE total_votes > 0
+            OR (total_votes = 0 AND is_played = 0)
+            ORDER BY total_votes DESC, id DESC
+            LIMIT 1
+        ");
 
-        try {
-            // Lấy link tiếp theo dựa trên total_votes và id (sử dụng raw query để tối ưu)
-            $link = Cache::remember('next_link', 2, function () {
-                return DB::selectOne("
-                    SELECT id, total_votes, is_played, duration
-                    FROM links
-                    WHERE total_votes > 0
-                    OR (total_votes = 0 AND is_played = 0)
-                    ORDER BY total_votes DESC, id DESC
-                    LIMIT 1
-                ");
-            });
-        
-            if ($link) {
-                // Insert link vào bảng schedules
-                DB::insert("
-                    INSERT INTO schedules (link_id, start_time)
-                    VALUES (?, ?)
-                ", [$link->id, Carbon::now()]);
-        
-                // Cập nhật trạng thái is_played = true
-                DB::update("
-                    UPDATE links
-                    SET is_played = 1
-                    WHERE id = ?
-                ", [$link->id]);
-        
-                Log::info("Link ID {$link->id} đã được phát và đánh dấu.");
-            } else {
-                // Nếu tất cả các link đã được phát, reset trạng thái
-                DB::update("
-                    UPDATE links
-                    SET is_played = 0
-                ");
-
-                $link = DB::selectOne("
-                    SELECT id, title, url, total_votes, clan_id, video_id, duration
-                    FROM links
-                    WHERE total_votes > 0
-                    OR (total_votes = 0 AND is_played = 0)
-                    ORDER BY total_votes DESC, id DESC
-                    LIMIT 1
-                ");
-
-                DB::insert("
+        if ($link) {
+            // Insert link vào bảng schedules
+            DB::insert("
                 INSERT INTO schedules (link_id, start_time)
                 VALUES (?, ?)
             ", [$link->id, Carbon::now()]);
-                Log::info("Tất cả các link đã được phát, reset trạng thái is_played.");
-            }
-        
-            DB::commit();
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error("Đã xảy ra lỗi: " . $e->getMessage());
+
+            // Cập nhật trạng thái is_played = true
+            DB::update("
+                UPDATE links
+                SET is_played = 1
+                WHERE id = ?
+            ", [$link->id]);
+
+            Log::info("Link ID {$link->id} đã được phát và đánh dấu.");
+        } else {
+            // Nếu tất cả các link đã được phát, reset trạng thái
+            DB::update("
+                UPDATE links
+                SET is_played = 0
+            ");
+            $link = DB::selectOne("
+                SELECT id, title, url, total_votes, clan_id, video_id, duration
+                FROM links
+                WHERE total_votes > 0
+                OR (total_votes = 0 AND is_played = 0)
+                ORDER BY total_votes DESC, id DESC
+                LIMIT 1
+            ");
+
+            DB::insert("
+                INSERT INTO schedules (link_id, start_time)
+                VALUES (?, ?)
+            ", [$link->id, Carbon::now()]);
+            Log::info("Tất cả các link đã được phát, reset trạng thái is_played.");
         }
+
     }
 }

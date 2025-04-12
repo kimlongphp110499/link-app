@@ -7,6 +7,7 @@ use App\Models\Schedule;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class LinkService
 {
@@ -42,8 +43,9 @@ class LinkService
                     SET is_played = 1
                     WHERE id = ?
                 ", [$link->id]);
-        
-                Log::info("Link ID {$link->id} đã được phát và đánh dấu.");
+                $nextRunTime = Carbon::now()->addSeconds($link->duration - 3);
+                Cache::put('next_run_time', $nextRunTime, 3600);
+                Log::info("Link ID {$link->id} controller đã được phát và đánh dấu.");
             } else {
                 // Nếu tất cả các link đã được phát, reset trạng thái
                 DB::update("
