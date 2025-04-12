@@ -32,7 +32,7 @@ class LinkController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'url' => 'required|url',
-            'video_id' => 'required|string|max:100',
+            'video_id' => 'required|string|max:100|unique:links',
             'duration' => 'required|integer|min:1',
         ]);
 
@@ -61,10 +61,11 @@ class LinkController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'url' => 'required|url',
-            'video_id' => 'required|string|max:100',
+            'video_id' => 'required|string|max:100|unique:links,video_id,' . $id,
             'clan_ids' => 'nullable|array',
             'duration' => 'required|integer|min:1',
         ]);
+
 
         $link = Link::findOrFail($id);
         $link->update([

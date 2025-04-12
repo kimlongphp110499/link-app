@@ -24,7 +24,7 @@ class ClanController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:191|unique:clans',
         ]);
 
         $clan = Clan::create([
@@ -45,7 +45,7 @@ class ClanController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:191|unique:clans,name,' . $id,
             'points' => 'required|integer|min:0',
         ]);
 

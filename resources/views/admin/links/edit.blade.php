@@ -63,7 +63,7 @@
              type="text"
              class="form-control"
              name="video_id"
-             value="{{ old('url', $link->video_id) }}"
+             value="{{ old('video_id', $link->video_id) }}"
              required>
       @error('video_id')
         <div class="text-danger">{{ $message }}</div>

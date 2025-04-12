@@ -103,7 +103,7 @@ class UserVoteLinkController extends Controller
  
          $clan = Clan::findOrFail($clanId);
          $user = User::findOrFail($userId);
-         $pointsAdded = $request->points;
+         $pointsAdded = 1;
  
          // Kiểm tra xem người dùng đã từng cộng điểm cho clan này chưa
         $existingHistory = ClanPointHistory::where('user_id', $user->id)
@@ -157,9 +157,12 @@ class UserVoteLinkController extends Controller
 
         // Kiểm tra nếu query tồn tại
         if ($query) {
-            // Tìm kiếm các link theo tiêu đề hoặc URL
-            $links = Link::where('title', 'like', '%' . $query . '%')
-                ->orWhere('video_id', 'like', '%' . $query . '%')
+            // Loại bỏ khoảng trắng trong query
+            $normalizedQuery = str_replace(' ', '', $query);
+    
+            // Tìm kiếm các link theo tiêu đề hoặc ID video
+            $links = Link::whereRaw("REPLACE(title, ' ', '') LIKE ?", ["%{$normalizedQuery}%"])
+                ->orWhereRaw("REPLACE(video_id, ' ', '') LIKE ?", ["%{$normalizedQuery}%"])
                 ->get();
         } else {
             // Nếu không có query, trả về tất cả các link
