@@ -7,9 +7,22 @@ use Illuminate\Http\Request;
 use App\Models\Clan;
 use App\Models\Schedule;
 use Illuminate\Support\Facades\Log;
+use App\Services\LinkService;
 
 class LinkController extends Controller
 {
+    protected $linkService;
+
+    /**
+     * Inject LinkService in Controller.
+     *
+     * @param linkService $linkService
+     */
+    public function __construct(LinkService $linkService)
+    {
+        $this->linkService = $linkService;
+    }
+
     // Hiển thị danh sách links
     public function index()
     {
@@ -112,26 +125,8 @@ class LinkController extends Controller
 
         try {
             if($value == 'true') {
-                // Lấy danh sách links, ưu tiên theo total_votes, nếu bằng nhau thì lấy theo id (mới nhất)
-                $video = Link::where('total_votes', '>', 0)
-                    ->orderBy('total_votes', 'desc')
-                    ->orderBy('id', 'desc')
-                    ->first();
-
-                if (!$video) {
-                    $video = Link::inRandomOrder()->first();
-                }
-
-                if (!$video) {
-                    Log::warning("No videos found to schedule");
-                    return;
-                }
-
-                // Chỉ thêm 1 video (video có votes cao nhất, hoặc mới nhất nếu votes bằng nhau)
-                Schedule::create([
-                    'link_id' => $video->id,
-                    'start_time' => now(),
-                ]);
+                $this->linkService->videoSchedule();
+               
             } else {
                 Schedule::truncate();
             }
