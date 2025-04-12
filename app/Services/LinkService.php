@@ -79,30 +79,34 @@ class LinkService
     public function videoRank()
     {
         // Truy vấn chính
-        $ranks = collect(DB::select("
-            SELECT *
-            FROM links
-            WHERE id NOT IN (
-                SELECT link_id FROM schedules
-            )
-            AND (
-                total_votes > 0 OR (total_votes = 0 AND is_played = 0)
-            )
-            ORDER BY total_votes DESC, id DESC
-            LIMIT 3
-        "));
+        $ranks = DB::table('links')
+            ->whereNotIn('id', function($query) {
+                $query->select('link_id')->from('schedules');
+            })
+            ->where(function($query) {
+                $query->where('total_votes', '>', 0)
+                    ->orWhere(function($query) {
+                        $query->where('total_votes', 0)->where('is_played', 0);
+                    });
+            })
+            ->orderBy('total_votes', 'desc')
+            ->orderBy('id', 'desc')
+            ->limit(3)
+            ->get();
 
         // Nếu kết quả trả về < 3, bổ sung thêm các hàng dựa trên id
         if ($ranks->count() < 3) {
-            $additionalRanks = collect(DB::select("
-                SELECT *
-                FROM links
-                WHERE id NOT IN (
-                    SELECT link_id FROM schedules
-                )
-                ORDER BY id DESC
-                LIMIT " . (3 - $ranks->count())
-            ));
+            $existingIds = $ranks->pluck('id')->toArray();
+
+            $additionalRanks = DB::table('links')
+                ->whereNotIn('id', function($query) {
+                    $query->select('link_id')->from('schedules');
+                })
+                ->whereNotIn('id', $existingIds)
+                ->orderBy('total_votes', 'desc')
+                ->orderBy('id', 'desc')
+                ->limit(3 - $ranks->count())
+                ->get();
 
             $ranks = $ranks->merge($additionalRanks);
         }
