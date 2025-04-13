@@ -11,17 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Schema::table('clan_point_histories', function (Blueprint $table) {
-        //     if (Schema::hasColumn('clan_point_histories', 'point_added')) {
-        //         $table->dropColumn('point_added');
-        //     }
-        // });
+        Schema::table('clan_point_histories', function (Blueprint $table) {
+            if (Schema::hasColumn('clan_point_histories', 'point_added')) {
+                $table->dropColumn('point_added');
+            }
+        });
 
-        // Schema::table('clans', function (Blueprint $table) {
-        //     if (Schema::hasColumn('clans', 'points')) {
-        //         $table->dropColumn('points');
-        //     }
-        // });
+        Schema::table('clans', function (Blueprint $table) {
+            if (Schema::hasColumn('clans', 'points')) {
+                $table->dropColumn('points');
+            }
+        });
     }
 
     /**
@@ -29,12 +29,12 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Schema::table('clan_point_histories', function (Blueprint $table) {
-        //     $table->integer('point_added')->nullable();
-        // });
+        Schema::table('clan_point_histories', function (Blueprint $table) {
+            $table->integer('point_added')->nullable();
+        });
 
-        // Schema::table('clans', function (Blueprint $table) {
-        //     $table->integer('points')->nullable();
-        // });
+        Schema::table('clans', function (Blueprint $table) {
+            $table->integer('points')->nullable();
+        });
     }
 };

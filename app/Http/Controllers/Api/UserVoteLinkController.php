@@ -109,17 +109,16 @@ class UserVoteLinkController extends Controller
 
 
      // Cộng điểm cho clan
-     public function addPointsToClan(Request $request, $userId, $clanId)
-     {
-         $request->validate([
-             'points' => 'required|integer|min:1',
-         ]);
- 
-         $clan = Clan::findOrFail($clanId);
-         $user = User::findOrFail($userId);
-         $pointsAdded = 1;
- 
-         // Kiểm tra xem người dùng đã từng cộng điểm cho clan này chưa
+    public function addPointsToClan(Request $request, $userId, $clanId)
+    {
+        $request->validate([
+            'points' => 'required|integer|min:1',
+        ]);
+
+        $clan = Clan::findOrFail($clanId);
+        $user = User::findOrFail($userId);
+
+        // Kiểm tra xem người dùng đã từng cộng điểm cho clan này chưa
         $existingHistory = ClanPointHistory::where('user_id', $user->id)
             ->where('clan_id', $clan->id)
             ->exists();
@@ -128,19 +127,15 @@ class UserVoteLinkController extends Controller
         if ($existingHistory) {
             return false;
         }
-         // Cộng điểm cho clan
-         $clan->points += $pointsAdded;
-         $clan->save();
- 
-         // Lưu lịch sử cộng điểm
-         ClanPointHistory::create([
-             'user_id' => $user->id,
-             'clan_id' => $clan->id,
-             'points_added' => $pointsAdded,
-         ]);
- 
-         return true;
-     }
+
+        // Lưu lịch sử cộng điểm
+        ClanPointHistory::create([
+            'user_id' => $user->id,
+            'clan_id' => $clan->id,
+        ]);
+
+        return true;
+    }
 
     public function rankLinks()
     {
