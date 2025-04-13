@@ -28,9 +28,8 @@ class LinkController extends Controller
     {
         $links = Link::with('clans')->paginate(20);
         $clans = Clan::all();
-        $checkSchedule = Schedule::count();
 
-        return view('admin.links.index', compact('links', 'clans', 'checkSchedule'));
+        return view('admin.links.index', compact('links', 'clans'));
     }
 
     // Hiển thị form tạo link

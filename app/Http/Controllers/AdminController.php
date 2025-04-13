@@ -11,7 +11,9 @@ class AdminController extends Controller
 {
     public function dashboard()
     {
-        return view('admin.dashboard');
+        $checkSchedule = Schedule::count();
+
+        return view('admin.dashboard', compact('checkSchedule'));
     }
 
     // Hiển thị trang đăng nhập
