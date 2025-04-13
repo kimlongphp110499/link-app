@@ -26,25 +26,16 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 Route::middleware('auth:sanctum')->group(function () {
-   // lịch sử giao dịch
     Route::get('/transaction-history', [TransactionHistoryController::class, 'getHistory']);
-    // user nạp tiềntiền
     Route::post('/add-points', [PaymentController::class, 'addPoints']);
-    //for users
     Route::post('users/store', [UserController::class, 'storeUser']);
     Route::post('users', [UserController::class, 'updateUser']);
-    // api để người dùng vote cho link
     Route::post('users/vote/{linkId}', [UserVoteLinkController::class, 'vote']);
-    // api để lấy lịch sử vote của người dùng
     Route::get('users/vote-history', [UserVoteLinkController::class, 'voteHistory']);
-
     Route::get('clans/top-voter', [ClanController::class, 'getClansWithTopVoter']);
-
     Route::get('links/search', [UserVoteLinkController::class, 'searchLinks']);
-
     Route::post('honors/index', [HonorController::class, 'index']);
-
-    //logout
+    Route::post('video-check/{linkId}', [VideoPlaybackController::class, 'index']);
     Route::post('/logout', [UserController::class, 'logout']);
 });
 

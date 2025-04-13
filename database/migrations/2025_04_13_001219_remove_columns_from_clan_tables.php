@@ -12,10 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Xóa cột "point_added" nếu tồn tại
-        if (DB::getSchemaBuilder()->hasColumn('clan_point_histories', 'point_added')) {
+        // Xóa cột "points_added" nếu tồn tại
+        if (DB::getSchemaBuilder()->hasColumn('clan_point_histories', 'points_added')) {
             Schema::table('clan_point_histories', function (Blueprint $table) {
-                $table->dropColumn('point_added');
+                $table->dropColumn('points_added');
             });
         }
 
@@ -33,7 +33,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('clan_point_histories', function (Blueprint $table) {
-            $table->integer('point_added')->nullable();
+            $table->integer('points_added')->nullable();
         });
 
         Schema::table('clans', function (Blueprint $table) {

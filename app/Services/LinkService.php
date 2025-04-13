@@ -26,17 +26,17 @@ class LinkService
                 ORDER BY total_votes DESC, id DESC
                 LIMIT 1
             ");
-        
+
             if ($link) {
                 // Xóa tất cả các dòng trong bảng schedules (truncate nhanh hơn delete)
                 DB::statement("TRUNCATE TABLE schedules");
-        
+
                 // Insert link vào bảng schedules
                 DB::insert("
                     INSERT INTO schedules (link_id, start_time)
                     VALUES (?, ?)
                 ", [$link->id, Carbon::now()]);
-        
+
                 // Cập nhật trạng thái is_played = true
                 DB::update("
                     UPDATE links
@@ -68,21 +68,19 @@ class LinkService
             ", [$link->id, Carbon::now()]);
                 Log::info("Tất cả các link đã được phát, reset trạng thái is_played.");
             }
-        
+
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error("Đã xảy ra lỗi: " . $e->getMessage());
         }
     }
-    
+
     public function videoRank()
     {
-        // Truy vấn chính
         $ranks = DB::table('links')
-            ->whereNotIn('id', function($query) {
-                $query->select('link_id')->from('schedules');
-            })
+            ->leftJoin('schedules', 'links.id', '=', 'schedules.link_id')
+            ->whereNull('schedules.link_id')
             ->where(function($query) {
                 $query->where('total_votes', '>', 0)
                     ->orWhere(function($query) {
@@ -93,15 +91,12 @@ class LinkService
             ->orderBy('id', 'desc')
             ->limit(3)
             ->get();
-
-        // Nếu kết quả trả về < 3, bổ sung thêm các hàng dựa trên id
         if ($ranks->count() < 3) {
             $existingIds = $ranks->pluck('id')->toArray();
 
             $additionalRanks = DB::table('links')
-                ->whereNotIn('id', function($query) {
-                    $query->select('link_id')->from('schedules');
-                })
+                ->leftJoin('schedules', 'links.id', '=', 'schedules.link_id')
+                ->whereNull('schedules.link_id')
                 ->whereNotIn('id', $existingIds)
                 ->orderBy('total_votes', 'desc')
                 ->orderBy('id', 'desc')
@@ -110,6 +105,16 @@ class LinkService
 
             $ranks = $ranks->merge($additionalRanks);
         }
+
+        $linkIds = $ranks->pluck('id')->toArray();
+        $counts = DB::table('ClanTempMember')
+            ->select('link_id', DB::raw('COUNT(*) as count'))
+            ->whereIn('link_id', $linkIds)
+            ->groupBy('link_id')
+            ->pluck('count', 'link_id');
+        $ranks->each(function ($item) use ($counts) {
+            $item->clan_temp_point = $counts[$item->id] ?? 0;
+        });
 
         return $ranks;
     }
