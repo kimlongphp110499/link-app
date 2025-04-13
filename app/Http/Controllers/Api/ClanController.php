@@ -11,17 +11,19 @@ class ClanController extends Controller
 {
     public function getClansWithTopVoter()
     {
-        // Lấy tất cả clans
-        $clans = Clan::orderByDesc('points') // Sắp xếp các clans theo tổng điểm
-                    ->take(10)
-                    ->get();
+        // Lấy tất cả clans (không còn sử dụng cột `points`, chỉ lấy danh sách clan)
+        $clans = Clan::get();
 
         // Mảng kết quả
         $result = [];
 
         foreach ($clans as $clan) {
-            // Lấy tổng điểm của clan
-            $totalPoints = $clan->points;
+            // Tính tổng số lần vote của clan (dựa trên số lượng bản ghi trong bảng ClanPointHistory)
+            $totalVotes = ClanPointHistory::where('clan_id', $clan->id)
+                ->whereBetween('created_at', [
+                    Carbon::now()->startOfMonth(),
+                    Carbon::now()->endOfMonth()
+                ])->count();
 
             // Lấy người vote nhiều nhất trong tháng
             $topVoter = ClanPointHistory::where('clan_id', $clan->id)
@@ -29,21 +31,31 @@ class ClanController extends Controller
                     Carbon::now()->startOfMonth(),
                     Carbon::now()->endOfMonth()
                 ])
-                ->selectRaw('user_id, SUM(points_added) as total_points')
+                ->selectRaw('user_id, COUNT(user_id) as total_votes')
                 ->groupBy('user_id')
-                ->orderByDesc('total_points')
+                ->orderByDesc('total_votes')
                 ->first();
 
-            // Nếu có người vote, lấy thông tin người đó
-            $topVoterName = $topVoter ? $topVoter->user->name : null;
-            $topVoterPoints = $topVoter ? $topVoter->total_points : 0;
+           // Kiểm tra nếu $topVoter không null, lấy thông tin user
+            $topVoterName = null;
+            $topVoterUserId = null;
+            $topVoterVotes = 0;
 
+            if ($topVoter) {
+                $topVoterUser = User::find($topVoter->user_id); // Lấy thông tin user từ bảng User
+                if ($topVoterUser) {
+                    $topVoterName = $topVoterUser->name;
+                    $topVoterUserId = $topVoterUser->id;
+                }
+                $topVoterVotes = $topVoter->total_votes;
+            }
             // Thêm thông tin vào mảng kết quả
             $result[] = [
                 'clan_name' => $clan->name,
-                'total_points' => $totalPoints,
+                'total_votes' => $totalVotes, // Tổng số lần vote cho clan
                 'top_voter' => $topVoterName,
-                'top_voter_points' => (int) $topVoterPoints,
+                'top_voter_user_id' => $topVoterUserId,
+                'top_voter_votes' => (int) $topVoterVotes, // Số lần vote của người vote nhiều nhất
             ];
         }
 
