@@ -87,31 +87,34 @@ class LinkService
                         $query->where('total_votes', 0)->where('is_played', 0);
                     });
             })
+            ->select('links.*')
             ->orderBy('total_votes', 'desc')
             ->orderBy('id', 'desc')
             ->limit(3)
             ->get();
+
         if ($ranks->count() < 3) {
             $existingIds = $ranks->pluck('id')->toArray();
 
             $additionalRanks = DB::table('links')
-                ->leftJoin('schedules', 'links.id', '=', 'schedules.link_id')
-                ->whereNull('schedules.link_id')
-                ->whereNotIn('id', $existingIds)
+                ->leftJoin('schedules', 'links.id', '=', 'schedules.link_id') 
+                ->whereNull('schedules.link_id') 
+                ->whereNotIn('links.id', $existingIds)
+                ->select('links.*')
                 ->orderBy('total_votes', 'desc')
-                ->orderBy('id', 'desc')
+                ->orderBy('links.id', 'desc')
                 ->limit(3 - $ranks->count())
-                ->get();
+            ->get();
 
             $ranks = $ranks->merge($additionalRanks);
         }
 
         $linkIds = $ranks->pluck('id')->toArray();
-        $counts = DB::table('ClanTempMember')
-            ->select('link_id', DB::raw('COUNT(*) as count'))
-            ->whereIn('link_id', $linkIds)
-            ->groupBy('link_id')
-            ->pluck('count', 'link_id');
+        $counts = DB::table('clan_temp_members')
+        ->select('link_id', DB::raw('COUNT(*) as count'))
+        ->whereIn('link_id', $linkIds)
+        ->groupBy('link_id')
+        ->pluck('count', 'link_id');
         $ranks->each(function ($item) use ($counts) {
             $item->clan_temp_point = $counts[$item->id] ?? 0;
         });
