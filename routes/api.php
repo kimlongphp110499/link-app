@@ -36,8 +36,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('users/vote-history', [UserVoteLinkController::class, 'voteHistory']);
     Route::get('clans/top-voter', [ClanController::class, 'getClansWithTopVoter']);
     Route::get('links/search', [UserVoteLinkController::class, 'searchLinks']);
-    Route::get('honors/index', [HonorController::class, 'index']);
-    Route::post('video-check/{linkId}', [VideoPlaybackController::class, 'index']);
+    Route::get('video-honors', [HonorController::class, 'index']);
+    Route::get('verify-video/{id}', [VideoPlaybackController::class, 'index']);
     Route::post('/logout', [UserController::class, 'logout']);
 });
 

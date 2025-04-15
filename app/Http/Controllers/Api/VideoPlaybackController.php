@@ -9,12 +9,12 @@ use Illuminate\Support\Facades\DB;
 
 class VideoPlaybackController extends Controller
 {
-    public function store($linkId)
+    public function store($id)
     {
         try {
             DB::beginTransaction();
             $memberClan = ClanTempMember::select('user_id', 'clan_id')
-                    ->where('link_id', $linkId)
+                    ->where('link_id', $id)
                     ->get();
             if ($memberClan->isEmpty()) {
                 return response()->json([
@@ -32,7 +32,7 @@ class VideoPlaybackController extends Controller
                 ];
             }
             ClanPointHistory::insert($dataToInsert);
-            ClanTempMember::where('link_id', $linkId)
+            ClanTempMember::where('link_id', $id)
                      ->delete();
             DB::commit();
 
