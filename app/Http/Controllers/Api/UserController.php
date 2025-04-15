@@ -66,6 +66,7 @@ class UserController extends Controller
             'phone' => 'nullable|string|max:15|unique:users',
             'avatar' => 'nullable|string|max:191',
             'nick_name' => 'nullable|string|max:191',
+            'google_id' => 'required|string|unique:users',
         ]);
 
         $user = User::create([
@@ -74,6 +75,7 @@ class UserController extends Controller
             'phone' => $request->phone,
             'email' => $request->email,
             'nick_name' => $request->nick_name,
+            'google_id' => $request->google_id,
         ]);
 
         return response()->json([

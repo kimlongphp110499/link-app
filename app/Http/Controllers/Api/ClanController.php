@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\ClanPointHistory;
 use Carbon\Carbon;
 use App\Models\Clan;
+use App\Models\User;
+
 class ClanController extends Controller
 {
     public function getClansWithTopVoter()
