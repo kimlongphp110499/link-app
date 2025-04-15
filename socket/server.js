@@ -37,6 +37,8 @@ io.on('connection', (socket) => {
     user_id = data.user_id;
     user_name = data.user_name;
     avatar = data.avatar;
+    reply_id = data.reply_id;
+    reply_to = data.reply_to;
     console.log('User info received:', user_id, user_name);
   });
 
@@ -64,6 +66,7 @@ io.on('connection', (socket) => {
       user_name: user_name,
       avatar: avatar,
       timestamp: Date.now(),
+      reply_id: data.reply_id || null,
       reply_to: data.reply_to || null,
     };
   
