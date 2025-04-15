@@ -75,34 +75,28 @@ class UserVoteLinkController extends Controller
         ]);
 
         if ($voteHistory) {
-            $clanId = $link->clan_id;
-            $exitUserClan = $this->clanPointHistoryService->existingHistory($userId, $clanId);
-            if (!$exitUserClan) {
-                try {
-                    ClanTempMember::create([
-                        'user_id' => $user->id,
-                        'link_id' => $link->id,
-                        'clan_id' => $clanId,
-                    ]);
-                } catch (\Exception $e) {
-                    Log::error('Unexpected error while fetching honors: ' . $e->getMessage(), [
-                        'exception' => $e->getTraceAsString(),
-                    ]);
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => 'An unexpected error occurred.',
-                    ], 500);
+            $clanIds = $link->clan_id;
+            foreach ($clanIds as $clanId) {
+                $exitUserClan = $this->clanPointHistoryService->existingHistory($userId, $clanId);
+                if (!$exitUserClan) {
+                    try {
+                        ClanTempMember::create([
+                            'user_id' => $user->id,
+                            'link_id' => $link->id,
+                            'clan_id' => $clanId,
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::error('Unexpected error while fetching honors: ' . $e->getMessage(), [
+                            'exception' => $e->getTraceAsString(),
+                        ]);
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => 'An unexpected error occurred.',
+                        ], 500);
+                    }
                 }
             }
         }
-
-        // vote cho clan
-//        $addPointsToClan = false;
-//        if($link->clans) {
-//            foreach($link->clans as $clan) {
-//                $addPointsToClan = $this->addPointsToClan($request, $userId, $clan->id);
-//            }
-//        }
 
         return response()->json([
             'message' => 'Vote successful',
@@ -110,7 +104,6 @@ class UserVoteLinkController extends Controller
             'link_id' => $link->id,
             'user_points' => $user->points,
             'total_votes_for_link' => $link->total_votes,
-//            'point_added_to_clan' => $addPointsToClan,
         ], 200);
     }
 
@@ -134,32 +127,6 @@ class UserVoteLinkController extends Controller
 
         // Trả về danh sách vote histories của người dùng
         return response()->json($voteHistories, 200);
-    }
-
-
-    // Cộng điểm cho clan
-    public function addPointsToClan(Request $request, $userId, $clanId)
-    {
-        $request->validate([
-            'points' => 'required|integer|min:1',
-        ]);
-
-        $clan = Clan::findOrFail($clanId);
-        $user = User::findOrFail($userId);
-        // Kiểm tra xem người dùng đã từng cộng điểm cho clan này chưa
-        $existingHistory = $this->existingHistory($userId, $clanId);
-
-        // Nếu đã có lịch sử cộng điểm thì không cho phép cộng thêm
-        if ($existingHistory) {
-            return false;
-        }
-        // Lưu lịch sử cộng điểm
-        ClanPointHistory::create([
-            'user_id' => $user->id,
-            'clan_id' => $clan->id,
-        ]);
-
-        return true;
     }
 
     public function rankLinks()
