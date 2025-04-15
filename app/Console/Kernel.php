@@ -27,6 +27,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')->hourly();
         $schedule->command('schedules:update')->everyFiveSeconds();
         $schedule->command('log:clear')->everyFourHours();
+        $schedule->command('clan:clear-points')->monthlyOn(1, '00:00');
     }
 
     /**
