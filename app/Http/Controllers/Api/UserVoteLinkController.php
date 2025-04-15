@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\ClanLink;
 use App\Models\ClanTempMember;
 use Illuminate\Http\Request;
 use App\Models\Link;
@@ -75,15 +76,15 @@ class UserVoteLinkController extends Controller
         ]);
 
         if ($voteHistory) {
-            $clanIds = $link->clan_id;
-            foreach ($clanIds as $clanId) {
-                $exitUserClan = $this->clanPointHistoryService->existingHistory($userId, $clanId);
+            $clans =  ClanLink::select('clan_id')->where('link_id', $link->id)->get();
+            foreach ($clans as $clan) {
+                $exitUserClan = $this->clanPointHistoryService->existingHistory($userId, $clan->clan_id);
                 if (!$exitUserClan) {
                     try {
                         ClanTempMember::create([
                             'user_id' => $user->id,
                             'link_id' => $link->id,
-                            'clan_id' => $clanId,
+                            'clan_id' => $clan->clan_id,
                         ]);
                     } catch (\Exception $e) {
                         Log::error('Unexpected error while fetching honors: ' . $e->getMessage(), [
@@ -91,7 +92,7 @@ class UserVoteLinkController extends Controller
                         ]);
                         return response()->json([
                             'status' => 'error',
-                            'message' => 'An unexpected error occurred.',
+                            'message' => $e->getMessage(),
                         ], 500);
                     }
                 }

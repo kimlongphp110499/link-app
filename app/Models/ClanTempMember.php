@@ -9,7 +9,7 @@ class ClanTempMember extends Model
 {
     use HasFactory;
 
-    protected $table = 'honor';
+    protected $table = 'clan_temp_members';
 
     protected $fillable = ['user_id', 'link_id', 'clan_id'];
 

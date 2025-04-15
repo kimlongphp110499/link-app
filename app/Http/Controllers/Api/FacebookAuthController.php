@@ -79,14 +79,11 @@ class FacebookAuthController extends Controller
             return response()->json(['message' => 'Invalid access token'], 400);
         } catch (\Exception $e) {
             Log::error('Facebook login error', [
-                'access_token' => $accessToken,
+                'facebook_access_token' => $accessToken,
                 'error' => $e->getMessage(),
             ]);
 
-            return response()->json([
-                'message' => 'Error verifying token',
-                'error' => $e->getMessage(),
-            ], 500);
+            return response()->json(['message' => 'Error verifying token'], 500);
         }
     }
 
