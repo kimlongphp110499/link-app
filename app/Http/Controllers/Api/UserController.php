@@ -16,7 +16,7 @@ class UserController extends Controller
         // Xác thực dữ liệu đầu vào
         $request->validate([
             'name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:15',
+            'phone' => 'nullable|string|max:15|unique:users,phone,' . $auth->id,
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'nick_name' => 'nullable|string|max:255',
             // 'password' => 'nullable|string|min:6|confirmed',
@@ -63,7 +63,7 @@ class UserController extends Controller
         $request->validate([
             'name' => 'nullable|string|max:255',
             'email' => 'nullable|string|email|max:255|unique:users',
-            'phone' => 'nullable|string|max:15',
+            'phone' => 'nullable|string|max:15|unique:users',
             'avatar' => 'nullable|string|max:191',
             'nick_name' => 'nullable|string|max:191',
         ]);
