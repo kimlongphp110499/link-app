@@ -37,7 +37,7 @@ class VideoPlaybackController extends Controller
             DB::commit();
 
             return response()->json([
-                'message' => 'successfully',
+                'status' => 'success',
                 'delete_temporary_data' => true,
                 'add_points_to_clan' => true,
             ], 200);
