@@ -38,6 +38,6 @@ jobs:
           php artisan optimize
           cd /var/www/html/link-app/socket
 
-          pm2 restart all || pm2 start socket.js --name link-app-socket
+          pm2 restart all || pm2 start server.js --name socket-server
 
         EOF
