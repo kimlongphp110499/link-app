@@ -22,7 +22,7 @@ jobs:
 
     - name: Deploy to Server
       run: |
-        ssh root@212.85.25.129 << 'EOF'
+        ssh deploy@212.85.25.129 << 'EOF'
           # Chuyển đến thư mục dự án
           cd /var/www/html/link-app
 
