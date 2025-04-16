@@ -6,7 +6,7 @@ use App\Models\Link;
 use App\Models\Schedule;
 use Carbon\Carbon;
 
-class VideoController extends Controller
+class ScheduleController extends Controller
 {
     public function index()
     {

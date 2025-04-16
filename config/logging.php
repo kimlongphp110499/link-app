@@ -36,8 +36,11 @@ return [
 
     'channels' => [
         'stack' => [
-            'driver' => 'stack',
+            'driver' => 'daily',
             'channels' => ['single'],
+            'path' => storage_path('logs/error.log'),
+            'level' => 'error',
+            'days' => 7,
             'ignore_exceptions' => false,
         ],
 
