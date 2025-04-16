@@ -17,7 +17,42 @@ use App\Http\Controllers\LinkController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ClanController;
 use App\Http\Controllers\HonorController;
+use App\Http\Controllers\ScheduleController;
+use Illuminate\Support\Facades\File;
 
+Route::get('/error-log', function () {
+    $date = request('date', now()->format('Y-m-d')); // Nhận tham số ngày hoặc lấy ngày hiện tại
+    $logFilePath = storage_path("logs/error-{$date}.log");
+
+    if (!File::exists($logFilePath)) {
+        return view('error-log', [
+            'logs' => [],
+            'error' => "Log file does not exist."
+        ]);
+    }
+
+    $logs = File::lines($logFilePath)->toArray(); // Đọc từng dòng log
+
+    // Parse từng lỗi từ log
+    $parsedLogs = [];
+    foreach ($logs as $line) {
+        if (preg_match('/^\[(.*?)\] (.*?): (.*?)$/', $line, $matches)) {
+            $parsedLogs[] = [
+                'timestamp' => $matches[1],
+                'level' => $matches[2],
+                'message' => $matches[3],
+                'details' => ''
+            ];
+        } elseif (!empty($parsedLogs)) {
+            $parsedLogs[array_key_last($parsedLogs)]['details'] .= $line . "\n";
+        }
+    }
+
+    return view('error-log', [
+        'logs' => $parsedLogs,
+        'error' => null
+    ]);
+});
 
 Route::get('/admin/login', [AdminController::class, 'showLoginForm'])->name('admin.login');
 Route::post('/admin/login', [AdminController::class, 'login']);
