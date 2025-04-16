@@ -1,4 +1,4 @@
-name: Deploy to Production Server
+name: Deploy to Server
 
 on:
   push:
@@ -10,28 +10,38 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository
+    - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Set up SSH
-      uses: webfactory/ssh-agent@v0.8.1
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-    - name: Deploy Code to Server
+    - name: Configure SSH
       run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H 212.85.25.129 >> ~/.ssh/known_hosts
+
+    - name: Deploy to Server
+      run: |
+        ssh root@212.85.25.129 << 'EOF'
+          # Chuyển đến thư mục dự án
           cd /var/www/html/link-app
-          git reset --hard
+
+          # Reset code và pull nhánh mới nhất
           git pull origin master
+
+          # Cài đặt dependencies bằng Composer
           composer install --no-dev --optimize-autoloader
+
+          # Thiết lập quyền cho thư mục storage và cache
+          chown -R apache:apache /var/www/html/link-app
+          chmod -R 775 storage bootstrap/cache
+
+          # Chạy các lệnh Artisan
           php artisan migrate --force
-          php artisan config:cache
-          php artisan route:cache
-          php artisan view:cache
-          sudo systemctl restart php-fpm
-          sudo systemctl restart nginx
-          cd /var/www/html/link-app/socket
-          npm install
-          pm2 restart socket-server
+          php artisan config:clear
+          php artisan cache:clear
+          php artisan route:clear
+          php artisan view:clear
+          php artisan optimize
+
         EOF
