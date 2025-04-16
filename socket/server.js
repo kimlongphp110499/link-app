@@ -100,17 +100,14 @@ io.on('connection', (socket) => {
   });
   
   // Lắng nghe sự kiện 'send_name' từ client
-  socket.on('send_name', (name) => {
+  socket.on('send_name', (name, photo) => {
     console.log(`Name received: ${name}`);
   
     const notificationId = uuidv4();
     const notification = {
       id: notificationId,
       name: name,
-      user_id: user_id,
-      user_name: user_name,
-      avatar: avatar,
-      timestamp: Date.now(),
+      avatar: photo,
     };
   
     io.emit('show_name', notification);
