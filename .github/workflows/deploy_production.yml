@@ -22,26 +22,22 @@ jobs:
 
     - name: Deploy to Server
       run: |
-        ssh deploy@212.85.25.129 << 'EOF'
-          # Chuyển đến thư mục dự án
+        ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
           cd /var/www/html/link-app
 
-          # Reset code và pull nhánh mới nhất
           git pull origin master
 
-          # Cài đặt dependencies bằng Composer
           composer install --no-dev --optimize-autoloader
 
-          # Thiết lập quyền cho thư mục storage và cache
-          chown -R apache:apache /var/www/html/link-app
-          chmod -R 775 storage bootstrap/cache
-
-          # Chạy các lệnh Artisan
+          # run Artisan
           php artisan migrate --force
           php artisan config:clear
           php artisan cache:clear
           php artisan route:clear
           php artisan view:clear
           php artisan optimize
+          cd /var/www/html/link-app/socket
+
+          pm2 restart all || pm2 start socket.js --name link-app-socket
 
         EOF
