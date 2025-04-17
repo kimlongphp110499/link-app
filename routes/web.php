@@ -21,6 +21,7 @@ use App\Http\Controllers\ScheduleController;
 use Illuminate\Support\Facades\File;
 
 Route::get('/error-log', function () {
+    dd(exec('whoami'));
     $date = request('date', now()->format('Y-m-d'));
     $logFilePath = storage_path("logs/error-{$date}.log");
 
