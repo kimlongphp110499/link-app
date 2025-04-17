@@ -84,9 +84,13 @@ io.on('connection', (socket) => {
         if (repliedMessage) {
           messageData.replied_message = {
             id: repliedMessage.id,
+            user_id: repliedMessage.user_id,
             message: repliedMessage.message,
             user_name: repliedMessage.user_name,
             avatar: repliedMessage.avatar,
+            timestamp: repliedMessage.timestamp,
+            reply_id: repliedMessage.reply_id,
+            reply_to: repliedMessage.reply_to,
           };
         }
   

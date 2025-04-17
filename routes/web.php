@@ -21,7 +21,7 @@ use App\Http\Controllers\ScheduleController;
 use Illuminate\Support\Facades\File;
 
 Route::get('/error-log', function () {
-    $date = request('date', now()->format('Y-m-d')); // Nhận tham số ngày hoặc lấy ngày hiện tại
+    $date = request('date', now()->format('Y-m-d'));
     $logFilePath = storage_path("logs/error-{$date}.log");
 
     if (!File::exists($logFilePath)) {
@@ -31,9 +31,8 @@ Route::get('/error-log', function () {
         ]);
     }
 
-    $logs = File::lines($logFilePath)->toArray(); // Đọc từng dòng log
+    $logs = File::lines($logFilePath)->toArray();
 
-    // Parse từng lỗi từ log
     $parsedLogs = [];
     foreach ($logs as $line) {
         if (preg_match('/^\[(.*?)\] (.*?): (.*?)$/', $line, $matches)) {
