@@ -17,14 +17,14 @@ class UpdateSchedulesCommand extends Command
 
     public function handle()
     {
-        $nextRunTime = Cache::get('next_run_time');
-        if ($nextRunTime) {
-            $now = Carbon::now()->format('Y-m-d H:i:s');
-            if($now < $nextRunTime) {
-                Log::info("chưa đến time run: " . $nextRunTime);
-                return;
-            }
-        }
+        // $nextRunTime = Cache::get('next_run_time');
+        // if ($nextRunTime) {
+        //     $now = Carbon::now()->format('Y-m-d H:i:s');
+        //     if($now < $nextRunTime) {
+        //         Log::info("chưa đến time run: " . $nextRunTime);
+        //         return;
+        //     }
+        // }
 
         $now = Carbon::now();
         Log::info("Running UpdateSchedulesCommand at: " . $now->toIso8601String());
@@ -41,7 +41,7 @@ class UpdateSchedulesCommand extends Command
         $videoDuration = $currentSchedule->link->duration;
 
         // Tính toán thời gian cron job tiếp theo
-        $nextRunTime = $startTime->copy()->addSeconds($videoDuration - 3);
+        $nextRunTime = $startTime->copy()->addSeconds($videoDuration - 5);
         Log::info("Next run time calculated as: " . $nextRunTime->toIso8601String());
 
         // Nếu đã đến thời điểm chạy tiếp theo
@@ -68,9 +68,9 @@ class UpdateSchedulesCommand extends Command
             $this->updateSchedules();
 
             // Lưu thời gian chạy tiếp theo vào cache
-            $nextRunTime = Carbon::now()->addSeconds($videoDuration - 3);
-            Cache::put('next_run_time', $nextRunTime, 3600);
-            Log::info("Next run time for cron job set to: " . $nextRunTime->toIso8601String());
+            // $nextRunTime = Carbon::now()->addSeconds($videoDuration - 3);
+            // Cache::put('next_run_time', $nextRunTime, 3600);
+            // Log::info("Next run time for cron job set to: " . $nextRunTime->toIso8601String());
 
         }
     }
@@ -91,7 +91,7 @@ class UpdateSchedulesCommand extends Command
             DB::insert("
                 INSERT INTO schedules (link_id, start_time)
                 VALUES (?, ?)
-            ", [$link->id, Carbon::now()]);
+            ", [$link->id, Carbon::now()->addSeconds(5)]);
 
             // Cập nhật trạng thái is_played = true
             DB::update("
