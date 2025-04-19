@@ -22,23 +22,4 @@ class Honor extends Model
     protected $casts = [
         'date' => 'datetime',
     ];
-    public function setDateAttribute($value): void
-    {
-        try {
-            $this->attributes['date'] = Carbon::createFromFormat('Y/m/d H:i', $value)->format('Y-m-d H:i:s');
-        } catch (\Exception $e) {
-            Log::warning('Invalid date format for honor: ' . $value);
-            $this->attributes['date'] = null; // Or handle as needed
-        }
-    }
-
-    public function getDateAttribute($value): string
-    {
-        try {
-            return $value ? Carbon::parse($value)->format('Y/m/d H:i') : 'N/A';
-        } catch (\Exception $e) {
-            Log::warning('Failed to parse date for honor ID ' . $this->id . ': ' . $value);
-            return 'N/A';
-        }
-    }
 }

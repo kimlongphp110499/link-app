@@ -17,6 +17,10 @@ class HonorController extends Controller
             $honors = Honor::select('url_name', 'url', 'date')
                 ->whereDate('date', $today)
                 ->get();
+            foreach ($honors as $honor) {
+                $honor->date = Carbon::parse($honor->date);
+            }
+
             return response()->json([
                 'status' => 'success',
                 'data' => $honors
