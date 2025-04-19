@@ -43,24 +43,20 @@ class VideoController extends Controller
             $memberClan = ClanTempMember::select('user_id', 'clan_id')
                     ->where('link_id', $link->id)
                     ->get();
-            if ($memberClan->isEmpty()) {
-                return response()->json([
-                    'message' => 'No members found for the given link_id',
-                ], 404);
+            if (!$memberClan->isEmpty()) {
+                $dataToInsert = [];
+                foreach ($memberClan as $member) {
+                    $dataToInsert[] = [
+                        'user_id' => $member->user_id,
+                        'clan_id' => $member->clan_id,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+                ClanPointHistory::insert($dataToInsert);
+                ClanTempMember::where('link_id', $link->id)
+                         ->delete();
             }
-
-            $dataToInsert = [];
-            foreach ($memberClan as $member) {
-                $dataToInsert[] = [
-                    'user_id' => $member->user_id,
-                    'clan_id' => $member->clan_id,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
-            }
-            ClanPointHistory::insert($dataToInsert);
-            ClanTempMember::where('link_id', $link->id)
-                     ->delete();
             DB::commit();
 
             return response()->json([
