@@ -65,7 +65,7 @@ io.on('connection', (socket) => {
       user_id: user_id,
       user_name: user_name,
       avatar: avatar,
-      timestamp: Date.now(),
+      timestamp: data.timestamp || Date.now(),
       reply_id: data.reply_id || null,
       reply_to: data.reply_to || null,
     };

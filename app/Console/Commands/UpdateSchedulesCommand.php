@@ -41,7 +41,7 @@ class UpdateSchedulesCommand extends Command
         $videoDuration = $currentSchedule->link->duration;
 
         // Tính toán thời gian cron job tiếp theo
-        $nextRunTime = $startTime->copy()->addSeconds($videoDuration - 5);
+        $nextRunTime = $startTime->copy()->addSeconds($videoDuration);
         Log::info("Next run time calculated as: " . $nextRunTime->toIso8601String());
 
         // Nếu đã đến thời điểm chạy tiếp theo

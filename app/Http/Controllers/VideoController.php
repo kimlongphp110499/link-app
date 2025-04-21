@@ -37,7 +37,14 @@ class VideoController extends Controller
             : 0;
         $startTime = Carbon::parse($currentSchedule->start_time);
         $elapsedMilliseconds = (int)$now->diffInMilliseconds($startTime);
+        
         $durationMilliseconds = $link->duration ? $link->duration * 1000 : 0;
+        $wait = $elapsedMilliseconds + $durationMilliseconds;
+         // Kiểm tra nếu start_time lớn hơn thời gian hiện tại
+         if ($wait < 0) {
+             return response()->json(['message' => 'Please wait'], 202); // Trả về thông báo "Hãy chờ"
+         }
+
         try {
             DB::beginTransaction();
             $memberClan = ClanTempMember::select('user_id', 'clan_id')
