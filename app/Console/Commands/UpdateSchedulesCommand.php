@@ -91,7 +91,7 @@ class UpdateSchedulesCommand extends Command
             DB::insert("
                 INSERT INTO schedules (link_id, start_time)
                 VALUES (?, ?)
-            ", [$link->id, Carbon::now()->addSeconds(5)]);
+            ", [$link->id, Carbon::now()]);
 
             // Cập nhật trạng thái is_played = true
             DB::update("

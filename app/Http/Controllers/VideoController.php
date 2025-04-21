@@ -41,7 +41,7 @@ class VideoController extends Controller
         $durationMilliseconds = $link->duration ? $link->duration * 1000 : 0;
         $wait = $elapsedMilliseconds + $durationMilliseconds;
          // Kiểm tra nếu start_time lớn hơn thời gian hiện tại
-         if ($wait < 0) {
+         if ($elapsedMilliseconds > 0) {
              return response()->json(['message' => 'Please wait'], 202); // Trả về thông báo "Hãy chờ"
          }
 
