@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\FacebookAuthController;
+use App\Http\Controllers\Api\VideoPlaybackController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UserVoteLinkController;
@@ -34,8 +36,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('users/vote-history', [UserVoteLinkController::class, 'voteHistory']);
     Route::get('clans/top-voter', [ClanController::class, 'getClansWithTopVoter']);
     Route::get('links/search', [UserVoteLinkController::class, 'searchLinks']);
-    Route::post('honors/index', [HonorController::class, 'index']);
-    Route::post('video-check/{linkId}', [VideoPlaybackController::class, 'index']);
+    Route::get('video-honors', [HonorController::class, 'index']);
+    Route::get('verify-video/{id}', [VideoPlaybackController::class, 'store']);
     Route::post('/logout', [UserController::class, 'logout']);
 });
 
@@ -45,6 +47,7 @@ Route::get('links/rank', [UserVoteLinkController::class, 'rankLinks']);
 
 
 Route::post('/auth/google', [GoogleAuthController::class, 'authenticate']);
+Route::post('/auth/facebook', [FacebookAuthController::class, 'loginWithFacebook']);
 
 //for api
 Route::get('/current-video', [VideoController::class, 'getCurrentVideo']);

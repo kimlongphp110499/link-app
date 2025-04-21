@@ -11,7 +11,7 @@ class Honor extends Model
 {
     use HasFactory;
 
-    protected $table = 'honor';
+    protected $table = 'honors';
 
     protected $fillable = [
         'url_name',
