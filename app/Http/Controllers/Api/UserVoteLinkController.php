@@ -63,22 +63,27 @@ class UserVoteLinkController extends Controller
             'points_voted' => $pointsRequired,
         ]);
         if ($voteHistory) {
-            $clans =  ClanLink::select('clan_id')->where('link_id', $link->id)->get();
-            foreach ($clans as $clan) {
-                try {
-                    ClanTempMember::create([
-                        'user_id' => $user->id,
-                        'link_id' => $link->id,
-                        'clan_id' => $clan->clan_id,
-                    ]);
-                } catch (\Exception $e) {
-                    Log::error('Unexpected error while fetching honors: ' . $e->getMessage(), [
-                        'exception' => $e->getTraceAsString(),
-                    ]);
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => $e->getMessage(),
-                    ], 500);
+            $exitUserClanTempMember = ClanTempMember::where('user_id', $userId)
+                ->where('link_id', $link->id)
+                ->exists();
+            if (!$exitUserClanTempMember) {
+                $clans =  ClanLink::select('clan_id')->where('link_id', $link->id)->get();
+                foreach ($clans as $clan) {
+                    try {
+                        ClanTempMember::create([
+                            'user_id' => $user->id,
+                            'link_id' => $link->id,
+                            'clan_id' => $clan->clan_id,
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::error('Unexpected error while fetching honors: ' . $e->getMessage(), [
+                            'exception' => $e->getTraceAsString(),
+                        ]);
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => $e->getMessage(),
+                        ], 500);
+                    }
                 }
             }
         }
