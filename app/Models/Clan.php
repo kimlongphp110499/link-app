@@ -9,6 +9,7 @@ class Clan extends Model
 {
     use HasFactory;
 
+    protected $table = 'clans';
     protected $fillable = ['name', 'points'];
     // Quan hệ với bảng ClanPointHistory
     public function pointHistories()

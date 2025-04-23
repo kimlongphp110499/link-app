@@ -7,7 +7,9 @@ use App\Models\ClanLink;
 use App\Models\ClanTempMember;
 use Illuminate\Http\Request;
 use App\Models\Link;
+use App\Models\Clan;
 use App\Models\VoteHistory;
+use App\Models\ClanPointHistory;
 use App\Models\User;
 use App\Services\LinkService;
 use App\Services\ClanPointHistoryService;
@@ -70,7 +72,7 @@ class UserVoteLinkController extends Controller
                 $clans =  ClanLink::select('clan_id')->where('link_id', $link->id)->get();
                 foreach ($clans as $clan) {
                     try {
-                        $this->addPointsToClan($request, $user->id, $clan->id);
+                        $this->addPointsToClan($request, $user->id, $clan->clan_id);
 
                         ClanTempMember::create([
                             'user_id' => $user->id,
