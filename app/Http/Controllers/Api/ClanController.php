@@ -13,8 +13,9 @@ class ClanController extends Controller
 {
     public function getClansWithTopVoter()
     {
-        // Lấy tất cả clans (không còn sử dụng cột `points`, chỉ lấy danh sách clan)
-        $clans = Clan::get();
+        $clans = Clan::orderByDesc('points') // Sắp xếp các clans theo tổng điểm
+        ->take(10)
+        ->get();
 
         // Mảng kết quả
         $result = [];
