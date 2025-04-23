@@ -77,7 +77,7 @@
   <a href="{{ route('admin.links.create') }}"
      class="control-button start mb-3">Add New Link</a>
     <button id="control-button" class="control-button @if($checkSchedule > 0) stop @else start @endif mb-3">
-      <i class="@if($checkSchedule > 0) fas fa-pause @else fas fa-play @endif"></i> @if($checkSchedule > 0) Stop @else Start @endif
+      <i class="@if($checkSchedule > 0) fas fa-pause @else fas fa-play @endif"></i> @if($checkSchedule > 0) Stop Live @else Start Live @endif
     </button>
 
     <p id="status"></p>
@@ -88,6 +88,7 @@
         <th>Title</th>
         <th>URL</th>
         <th>Video ID</th>
+        <th>Points</th>
         <th>Assigned Clan</th>
         <th>Actions</th>
       </tr>
@@ -101,6 +102,7 @@
             <span title="{{ $link->url }}">{{ Str::limit($link->url, 50) }}</span>
           </td>
           <td>{{ $link->video_id }}</td>
+          <td>{{ $link->total_votes }}</td>
           <td>
             @if ($link->clans->isNotEmpty())
                 @foreach ($link->clans as $clan)
@@ -163,13 +165,13 @@
                     // Chuyển sang trạng thái "Start"
                     controlButton.classList.remove('stop');
                     controlButton.classList.add('start');
-                    controlButton.innerHTML = '<i class="fas fa-play"></i> Start';
+                    controlButton.innerHTML = '<i class="fas fa-play"></i> Start Live';
                     isPlaying = false;
                 } else {
                     // Chuyển sang trạng thái "Stop"
                     controlButton.classList.remove('start');
                     controlButton.classList.add('stop');
-                    controlButton.innerHTML = '<i class="fas fa-pause"></i> Stop';
+                    controlButton.innerHTML = '<i class="fas fa-pause"></i> Stop Live';
                     isPlaying = true;
                 }
             })

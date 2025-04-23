@@ -77,6 +77,7 @@ class LinkController extends Controller
             'video_id' => 'required|string|max:100|unique:links,video_id,' . $id,
             'clan_ids' => 'nullable|array',
             'duration' => 'required|integer|min:1',
+            'total_votes' => 'nullable|integer|min:0',
         ]);
 
 
@@ -86,6 +87,7 @@ class LinkController extends Controller
             'url' => $request->url,
             'video_id' => $request->video_id,
             'duration' => $request->duration,
+            'total_votes' => $request->total_votes,
         ]);
         $link->clans()->sync($request->clan_ids);
 

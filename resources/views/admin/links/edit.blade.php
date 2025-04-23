@@ -70,6 +70,18 @@
       @enderror
     </div>
     <div class="form-group">
+      <label for="total_votes">Points</label>
+      <input id="total_votes"
+             type="number"
+             class="form-control"
+             name="total_votes"
+             value="{{ old('total_votes', $link->total_votes) }}"
+             required>
+      @error('total_votes')
+        <div class="text-danger">{{ $message }}</div>
+      @enderror
+    </div>
+    <div class="form-group">
       <label for="clan">Assign Clan</label>
       <select name="clan_ids[]" id="clan_ids" multiple  class="form-control">
             @foreach ($clans as $clan)
@@ -82,6 +94,7 @@
         <div class="text-danger">{{ $message }}</div>
       @enderror
     </div>
+    
     <div class="form-group">
         <label for="duration">Duration (seconds)</label>
         <div class="input-group">
