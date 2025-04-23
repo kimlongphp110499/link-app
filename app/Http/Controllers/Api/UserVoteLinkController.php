@@ -70,6 +70,8 @@ class UserVoteLinkController extends Controller
                 $clans =  ClanLink::select('clan_id')->where('link_id', $link->id)->get();
                 foreach ($clans as $clan) {
                     try {
+                        $this->addPointsToClan($request, $user->id, $clan->id);
+
                         ClanTempMember::create([
                             'user_id' => $user->id,
                             'link_id' => $link->id,
@@ -96,7 +98,36 @@ class UserVoteLinkController extends Controller
             'total_votes_for_link' => $link->total_votes,
         ], 200);
     }
+    public function addPointsToClan(Request $request, $userId, $clanId)
+    {
+        $request->validate([
+            'points' => 'required|integer|min:1',
+        ]);
 
+        $clan = Clan::findOrFail($clanId);
+        $user = User::findOrFail($userId);
+        $pointsAdded = 1;
+        // Kiểm tra xem người dùng đã từng cộng điểm cho clan này chưa
+        $existingHistory = ClanPointHistory::where('user_id', $user->id)
+            ->where('clan_id', $clan->id)
+            ->exists();
+        if ($existingHistory) {
+            return false;
+        }
+
+         // Cộng điểm cho clan
+         $clan->points += $pointsAdded;
+         $clan->save();
+
+        // Lưu lịch sử cộng điểm
+        ClanPointHistory::create([
+            'user_id' => $user->id,
+            'clan_id' => $clan->id,
+            'points_added' => $pointsAdded,
+        ]);
+
+        return true;
+    }
     public function voteHistory(): \Illuminate\Http\JsonResponse
     {
         $auth = auth()->user();
