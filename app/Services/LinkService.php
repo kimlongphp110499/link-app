@@ -107,11 +107,12 @@ class LinkService
         }
         $linkIds = $ranks->pluck('id')->toArray();
         $counts = DB::table('clan_temp_members')
-        ->select('link_id')
-        ->distinct('user_id', 'link_id')
-        ->whereIn('link_id', $linkIds)
-        ->groupBy('link_id')
-        ->pluck('count', 'link_id');
+                ->select('link_id')
+                ->distinct('user_id', 'link_id')
+                ->whereIn('link_id', $linkIds)
+                ->get()
+                ->countBy('link_id')
+                ->toArray();
         $ranks->each(function ($item) use ($counts) {
             $item->clan_temp_point = $counts[$item->id] ?? 0;
         });
