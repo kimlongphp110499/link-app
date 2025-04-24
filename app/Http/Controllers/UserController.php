@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -57,12 +59,34 @@ class UserController extends Controller
         ]);
 
         $user = User::findOrFail($id);
+        $oldPoint = $user->points;
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
             'points' => $request->points,
             // 'password' => $request->password ? Hash::make($request->password) : $user->password,
         ]);
+        if($request->points != $oldPoint)
+        {
+            $payload = json_encode([
+                'user_id' => $id,
+                'points' => $request->points,
+            ]);
+        
+            Log::info('Attempting to publish to Redis', ['channel' => 'points-update', 'payload' => $payload]);
+        
+            try {
+                Redis::publish('points-update', $payload);
+                Log::info('Successfully published to Redis', ['channel' => 'points-update', 'payload' => $payload]);
+            } catch (\Exception $e) {
+                Log::error('Failed to publish to Redis', [
+                    'error' => $e->getMessage(),
+                    'channel' => 'points-update',
+                    'payload' => $payload
+                ]);
+                return response()->json(['message' => 'Failed to publish to Redis', 'error' => $e->getMessage()], 500);
+            }
+        }
 
         return redirect()->route('admin.users.index')->with('success', 'User updated successfully!');
     }
@@ -76,4 +100,3 @@ class UserController extends Controller
 
     
 }
-
