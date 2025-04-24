@@ -2,8 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Link;
-use App\Models\Schedule;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -11,7 +9,6 @@ use Illuminate\Support\Facades\Cache;
 
 class LinkService
 {
-
     public function videoSchedule()
     {
         DB::beginTransaction();
@@ -97,8 +94,8 @@ class LinkService
             $existingIds = $ranks->pluck('id')->toArray();
 
             $additionalRanks = DB::table('links')
-                ->leftJoin('schedules', 'links.id', '=', 'schedules.link_id') 
-                ->whereNull('schedules.link_id') 
+                ->leftJoin('schedules', 'links.id', '=', 'schedules.link_id')
+                ->whereNull('schedules.link_id')
                 ->whereNotIn('links.id', $existingIds)
                 ->select('links.*')
                 ->orderBy('total_votes', 'desc')
@@ -111,10 +108,12 @@ class LinkService
 
         $linkIds = $ranks->pluck('id')->toArray();
         $counts = DB::table('clan_temp_members')
-        ->select('link_id', DB::raw('COUNT(*) as count'))
-        ->whereIn('link_id', $linkIds)
-        ->groupBy('link_id')
-        ->pluck('count', 'link_id');
+                ->select('link_id')
+                ->distinct('user_id', 'link_id')
+                ->whereIn('link_id', $linkIds)
+                ->get()
+                ->countBy('link_id')
+                ->toArray();
         $ranks->each(function ($item) use ($counts) {
             $item->clan_temp_point = $counts[$item->id] ?? 0;
         });
