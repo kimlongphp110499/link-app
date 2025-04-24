@@ -105,6 +105,7 @@ class LinkService
 
             $ranks = $ranks->merge($additionalRanks);
         }
+
         $linkIds = $ranks->pluck('id')->toArray();
         $counts = DB::table('clan_temp_members')
                 ->select('link_id')
