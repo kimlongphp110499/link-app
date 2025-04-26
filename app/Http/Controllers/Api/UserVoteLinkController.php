@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Services\LinkService;
 use App\Services\ClanPointHistoryService;
 use Illuminate\Support\Facades\Log;
+use App\Models\Schedule;
 
 class UserVoteLinkController extends Controller
 {
@@ -48,6 +49,11 @@ class UserVoteLinkController extends Controller
         $link = Link::where('video_id', $linkId)->first();
         if (!$link) {
             return response()->json(['message' => 'Link not found'], 404);
+        }
+
+        $schedule = Schedule::where('link_id', $linkId)->first();
+        if ($schedule) {
+            return response()->json(['message' => 'Link in schedule'], 404);
         }
 
         $pointsRequired = $request->points;
