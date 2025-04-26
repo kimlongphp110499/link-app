@@ -51,7 +51,7 @@ class UserVoteLinkController extends Controller
             return response()->json(['message' => 'Link not found'], 404);
         }
 
-        $schedule = Schedule::where('link_id', $linkId)->first();
+        $schedule = Schedule::where('link_id', $link->id)->first();
         if ($schedule) {
             return response()->json(['message' => 'Link in schedule'], 404);
         }
