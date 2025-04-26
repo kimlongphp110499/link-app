@@ -22,11 +22,12 @@ class ClanController extends Controller
 
         foreach ($clans as $clan) {
             // Tính tổng số lần vote của clan (dựa trên số lượng bản ghi trong bảng ClanPointHistory)
-            $totalVotes = ClanPointHistory::where('clan_id', $clan->id)
-                ->whereBetween('created_at', [
-                    Carbon::now()->startOfMonth(),
-                    Carbon::now()->endOfMonth()
-                ])->count();
+            // $totalVotes = ClanPointHistory::where('clan_id', $clan->id)
+            //     ->whereBetween('created_at', [
+            //         Carbon::now()->startOfMonth(),
+            //         Carbon::now()->endOfMonth()
+            //     ])->count();
+            $totalVotes = $clan->points;
 
             // Lấy người vote nhiều nhất trong tháng
             $topVoter = ClanPointHistory::where('clan_id', $clan->id)
