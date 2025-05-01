@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Admin;
+use App\Models\Clan;
+use App\Models\ClanPointHistory;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
@@ -28,20 +32,20 @@ class AdminController extends Controller
             'email' => 'required|email',
             'password' => 'required|min:6',
         ]);
-    
+
         // Attempt to log in the user
         $credentials = $request->only('email', 'password');
         if (Auth::guard('admin')->attempt($credentials, $request->remember)) {
             // If successful, redirect to admin dashboard
             return redirect()->intended('admin/dashboard');
         }
-    
+
         // If login fails, redirect back with error message
         return redirect()->back()->withErrors([
             'email' => 'Thông tin đăng nhập không chính xác.',
         ]);
     }
-    
+
 
     // Đăng xuất
     public function logout()
@@ -114,5 +118,23 @@ class AdminController extends Controller
 
     public function show(Request $request)
     {
+    }
+
+    public function sendMail()
+    {
+        $clans = DB::table('clans')
+            ->select(
+                'clans.id',
+                'clans.name',
+                DB::raw('COALESCE((SELECT COUNT(*) FROM clan_point_histories WHERE clan_point_histories.clan_id = clans.id), 0) as total_clan_points'),
+                DB::raw('COALESCE(SUM(vote_histories.points_voted), 0) as total_vote_points')
+            )
+            ->leftJoin('clan_link', 'clans.id', '=', 'clan_link.clan_id')
+            ->leftJoin('links', 'clan_link.link_id', '=', 'links.id')
+            ->leftJoin('vote_histories', 'links.id', '=', 'vote_histories.link_id')
+            ->groupBy('clans.id', 'clans.name')
+            ->get();
+
+        dd($clans);
     }
 }
