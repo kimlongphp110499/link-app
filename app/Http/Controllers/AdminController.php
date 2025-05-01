@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Admin;
+use App\Models\Clan;
+use App\Models\ClanPointHistory;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
@@ -28,20 +32,20 @@ class AdminController extends Controller
             'email' => 'required|email',
             'password' => 'required|min:6',
         ]);
-    
+
         // Attempt to log in the user
         $credentials = $request->only('email', 'password');
         if (Auth::guard('admin')->attempt($credentials, $request->remember)) {
             // If successful, redirect to admin dashboard
             return redirect()->intended('admin/dashboard');
         }
-    
+
         // If login fails, redirect back with error message
         return redirect()->back()->withErrors([
             'email' => 'Thông tin đăng nhập không chính xác.',
         ]);
     }
-    
+
 
     // Đăng xuất
     public function logout()
