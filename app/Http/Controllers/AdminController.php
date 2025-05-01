@@ -119,22 +119,4 @@ class AdminController extends Controller
     public function show(Request $request)
     {
     }
-
-    public function sendMail()
-    {
-        $clans = DB::table('clans')
-            ->select(
-                'clans.id',
-                'clans.name',
-                DB::raw('COALESCE((SELECT COUNT(*) FROM clan_point_histories WHERE clan_point_histories.clan_id = clans.id), 0) as total_clan_points'),
-                DB::raw('COALESCE(SUM(vote_histories.points_voted), 0) as total_vote_points')
-            )
-            ->leftJoin('clan_link', 'clans.id', '=', 'clan_link.clan_id')
-            ->leftJoin('links', 'clan_link.link_id', '=', 'links.id')
-            ->leftJoin('vote_histories', 'links.id', '=', 'vote_histories.link_id')
-            ->groupBy('clans.id', 'clans.name')
-            ->get();
-
-        dd($clans);
-    }
 }
