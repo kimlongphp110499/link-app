@@ -38,6 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('links/search', [UserVoteLinkController::class, 'searchLinks']);
     Route::get('video-honors', [HonorController::class, 'index']);
 //    Route::get('verify-video/{id}', [VideoPlaybackController::class, 'store']);
+    Route::get('user-infor', [UserController::class, 'getUserInfo']);
     Route::post('/logout', [UserController::class, 'logout']);
 });
 
