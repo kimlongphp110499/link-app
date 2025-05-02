@@ -19,7 +19,8 @@ class reportPointClanAndStar implements FromCollection, WithHeadings, WithTitle,
             ->select(
                 'clans.id',
                 'clans.name',
-                DB::raw('COALESCE((SELECT COUNT(*) FROM clan_point_histories WHERE clan_point_histories.clan_id = clans.id), 0) as total_clan_points'),
+                'clans.points',
+//                DB::raw('COALESCE((SELECT COUNT(*) FROM clan_point_histories WHERE clan_point_histories.clan_id = clans.id), 0) as total_clan_points'),
                 DB::raw('COALESCE(SUM(vote_histories.points_voted), 0) as total_vote_points')
             )
             ->leftJoin('clan_link', 'clans.id', '=', 'clan_link.clan_id')

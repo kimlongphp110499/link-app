@@ -2,10 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Clan;
 use App\Models\ClanPointHistory;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\Console\Command\Command as CommandAlias;
+use Illuminate\Support\Facades\Log;
 
 class ClearPointClan extends Command
 {
@@ -31,15 +32,14 @@ class ClearPointClan extends Command
         try {
             DB::beginTransaction();
             ClanPointHistory::truncate();
-            \Log::infor('All records in clan_point_histories table have been deleted.');
+            Clan::query()->update(['points' => 0]);
+            Log::info('All records in clan_point_histories table have been deleted.');
             DB::commit();
-            return CommandAlias::SUCCESS;
+            return ['success' => true, 'message' => 'All clan points and histories have been reset.'];
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Clear clan point history error');
-            return response()->json([
-                'message' => 'Error while clearing clan_point_histories',
-            ], 500);
+            Log::error('Clear clan point history error: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Error while clearing clan_point_histories', 'error' => $e->getMessage()];
         }
     }
 }
