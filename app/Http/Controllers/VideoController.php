@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Clan;
 use App\Models\ClanPointHistory;
 use App\Models\ClanTempMember;
 use Illuminate\Support\Facades\DB;
@@ -37,7 +38,7 @@ class VideoController extends Controller
             : 0;
         $startTime = Carbon::parse($currentSchedule->start_time);
         $elapsedMilliseconds = (int)$now->diffInMilliseconds($startTime);
-        
+
         $durationMilliseconds = $link->duration ? $link->duration * 1000 : 0;
         $wait = $elapsedMilliseconds + $durationMilliseconds;
          // Kiểm tra nếu start_time lớn hơn thời gian hiện tại
@@ -52,6 +53,7 @@ class VideoController extends Controller
                     ->get();
             if (!$memberClan->isEmpty()) {
                 $dataToInsert = [];
+                $pointInsertClan = [];
                 foreach ($memberClan as $member) {
                     $dataToInsert[] = [
                         'user_id' => $member->user_id,
@@ -59,10 +61,17 @@ class VideoController extends Controller
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];
+                    $clanId = $member->clan_id;
+                    if (!isset($pointInsertClan[$clanId])) {
+                        $pointInsertClan[$clanId] = 0;
+                    }
+                    $pointInsertClan[$clanId]++;
                 }
                 ClanPointHistory::insert($dataToInsert);
-                ClanTempMember::where('link_id', $link->id)
-                         ->delete();
+                ClanTempMember::where('link_id', $link->id)->delete();
+                foreach ($pointInsertClan as $clanId => $count) {
+                    Clan::where('id', $clanId)->increment('points', $count);
+                }
             }
             DB::commit();
 

@@ -78,8 +78,6 @@ class UserVoteLinkController extends Controller
                 $clans =  ClanLink::select('clan_id')->where('link_id', $link->id)->get();
                 foreach ($clans as $clan) {
                     try {
-                        $this->addPointsToClan($request, $user->id, $clan->clan_id);
-
                         ClanTempMember::create([
                             'user_id' => $user->id,
                             'link_id' => $link->id,

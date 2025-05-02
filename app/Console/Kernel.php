@@ -28,8 +28,9 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')->hourly();
         $schedule->command('schedules:update')->everyTwoSeconds();
         $schedule->command('log:clear')->everyFourHours();
-        $schedule->command('clan:clear-points')->monthlyOn(1, '00:00');
+        $schedule->command('clan:clear-points')->dailyAt('23:59');
         $schedule->job(new SendMonthlyPointReport())->dailyAt('23:59');
+//        $schedule->command('clan:clear-points')->monthlyOn(1, '00:00');
 //        $schedule->job(new SendMonthlyPointReport())
 //               ->lastDayOfMonth('23:59')
 //               ->when(function () {
