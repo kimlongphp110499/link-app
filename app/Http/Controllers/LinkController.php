@@ -36,7 +36,9 @@ class LinkController extends Controller
     // Hiển thị form tạo link
     public function create()
     {
-        return view('admin.links.create');
+        $clans = Clan::all();
+
+        return view('admin.links.create', compact('clans'));
     }
 
     // Lưu thông tin link mới
@@ -47,14 +49,17 @@ class LinkController extends Controller
             'url' => 'required|url',
             'video_id' => 'required|string|max:100|unique:links',
             'duration' => 'required|integer|min:1',
+            'clan_ids' => 'nullable|array',
         ]);
 
-        Link::create([
+        $link = Link::create([
             'title' => $request->title,
             'url' => $request->url,
             'video_id' => $request->video_id,
             'duration' => $request->duration,
         ]);
+
+        $link->clans()->sync($request->clan_ids);
 
         return redirect()->route('admin.links.index')->with('success', 'Link created successfully!');
     }
@@ -140,5 +145,3 @@ class LinkController extends Controller
         }
     }
 }
-
-

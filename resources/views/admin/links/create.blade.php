@@ -5,7 +5,29 @@
 @section('content_header')
   <h1>Add New Link</h1>
 @stop
-
+@push('css')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    .select2-container--default .select2-results__option {
+        background-color: #f0f8ff;
+        color: #333;
+    }
+    .select2-container--default .select2-results__option--highlighted {
+        background-color: #1e90ff;
+        color: #fff;
+    }
+    .select2-container--default .select2-selection__choice {
+        background-color: #32cd32;
+        color: #fff;
+    }
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        background-color: #007bff;
+    }
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+        color: #fff;
+    }
+</style>
+@endpush
 @section('content')
   <form action="{{ route('admin.links.store') }}"
         method="POST">
@@ -47,6 +69,19 @@
       @enderror
     </div>
     <div class="form-group">
+      <label for="clan">Assign Clan</label>
+      <select name="clan_ids[]" id="clan_ids" multiple  class="form-control">
+            @foreach ($clans as $clan)
+                <option value="{{ $clan->id }}">
+                    {{ $clan->name }}
+                </option>
+            @endforeach
+        </select>
+      @error('clan_id')
+        <div class="text-danger">{{ $message }}</div>
+      @enderror
+    </div>
+    <div class="form-group">
         <label for="duration">Duration (seconds)</label>
         <div class="input-group">
             <input type="number" name="duration" class="form-control" id="duration"  value="{{ old('duration') }}" placeholder="Enter duration in seconds" min="1" required>
@@ -63,7 +98,11 @@
   </form>
 @stop
 @section('js')
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
+     $(document).ready(function() {
+        $('#clan_ids').select2();
+    });
     $('#duration').on('input', function() {
         const seconds = parseInt($(this).val()) || 0;
         const minutes = Math.floor(seconds / 60);

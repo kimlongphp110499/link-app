@@ -84,6 +84,24 @@ class UserController extends Controller
         ], 200);
     }
 
+    public function getUserInfo(Request $request)
+    {
+        $user =  auth()->user();
+         
+        if (!$user) {
+            return response()->json([
+                'message' => 'Unauthorized',
+            ], 401);
+        }
+ 
+        return response()->json([
+            'status' => 'success',
+            'user' => [
+                $user
+            ],
+        ]);
+    }
+
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
