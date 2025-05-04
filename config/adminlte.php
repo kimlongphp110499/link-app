@@ -350,6 +350,11 @@ return [
             'url' => 'admin/honors',
             'icon' => 'fas fa-solid fa-award',
         ],
+        [
+            'text' => 'Pages',
+            'url' => 'admin/policy/edit',
+            'icon' => 'fas fa-book',
+        ],
         // ['header' => 'account_settings'],
         // [
         //     'text' => 'profile',

@@ -18,6 +18,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ClanController;
 use App\Http\Controllers\HonorController;
 use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\PolicyController;
+use App\Http\Controllers\CKFinderController;
 use Illuminate\Support\Facades\File;
 
 Route::get('/error-log', function () {
@@ -72,7 +74,9 @@ Route::name('admin.')->middleware('auth:admin')->prefix('admin')->group(function
     Route::get('/schedules', [ScheduleController::class, 'index'])->name('schedules.index');
     Route::post('/schedules', [ScheduleController::class, 'store'])->name('schedules.store');
     Route::post('/video-status', [LinkController::class, 'videoStatus']);
-
+    Route::get('/policy/edit', [PolicyController::class, 'edit'])->name('policy.edit');
+    Route::post('/policy', [PolicyController::class, 'update'])->name('policy.update');
+    Route::post('/ckfinder/upload', [CKFinderController::class, 'upload'])->name('ckfinder.upload');
 });
 Route::resource('admin', AdminController::class)->middleware('auth:admin');
 
@@ -81,3 +85,4 @@ Route::get('/', function () {
 });
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/policy', [PolicyController::class, 'show'])->name('policy.show');

@@ -1,0 +1,1 @@
+<figure class="image"><img style="aspect-ratio:1779/683;" src="http://212.85.25.129/uploads/images/1746351544_SvWWN.png" width="1779" height="683"></figure><h2><strong>Policy</strong></h2><p>This is the<i> default p</i>olicy content. Edit it using the link below.</p><p>cúkeee</p><p>xasd</p><p>&nbsp;</p>
