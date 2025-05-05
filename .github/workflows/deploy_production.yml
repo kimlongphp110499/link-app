@@ -35,7 +35,6 @@ jobs:
           php artisan cache:clear
           php artisan route:clear
           php artisan view:clear
-          php artisan optimize
           cd /var/www/html/link-app/socket
 
           pm2 restart all || pm2 start server.js --name socket-server
