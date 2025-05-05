@@ -19,6 +19,8 @@ const io = socketIo(server, {
   }
 });
 
+const logStream = fs.createWriteStream('/app/socket.log', { flags: 'a' });
+
 // Kết nối Redis
 const redis = new Redis({
   host: 'localhost',
@@ -58,7 +60,23 @@ subscriber.on('message', (channel, message) => {
     } catch (e) {
       console.error('Failed to parse Redis message:', e, message);
     }
-  }
+  } else if (channel === 'honors') {
+    console.log('Parsed honor update:ádfasdfasfasfasfas');
+    let data;
+    try {
+        data = JSON.parse(message);
+        if (data.event === 'honor.updated') {
+            console.log('Parsed honor update:', data);
+            logStream.write(`${new Date().toISOString()} - Parsed honor update: ${JSON.stringify(data)}\n`);
+            io.emit('honor.updated', data.data);
+            console.log('Emitted honor.updated:', data.data);
+            logStream.write(`${new Date().toISOString()} - Emitted honor.updated: ${JSON.stringify(data.data)}\n`);
+        }
+    } catch (e) {
+        console.error('Failed to parse Redis message for honors:', e, message);
+        logStream.write(`${new Date().toISOString()} - Failed to parse Redis message for honors: ${e}, message: ${message}\n`);
+    }
+ }
 });
 
 // Lắng nghe kết nối từ client
