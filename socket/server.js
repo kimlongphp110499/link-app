@@ -60,17 +60,14 @@ subscriber.on('message', (channel, message) => {
     } catch (e) {
       console.error('Failed to parse Redis message:', e, message);
     }
-  } else if (channel === 'honors') {
+  } else if (channel === 'm4u_database_honors') {
     console.log('Parsed honor update:ádfasdfasfasfasfas');
     let data;
     try {
         data = JSON.parse(message);
         if (data.event === 'honor.updated') {
-            console.log('Parsed honor update:', data);
-            logStream.write(`${new Date().toISOString()} - Parsed honor update: ${JSON.stringify(data)}\n`);
             io.emit('honor.updated', data.data);
             console.log('Emitted honor.updated:', data.data);
-            logStream.write(`${new Date().toISOString()} - Emitted honor.updated: ${JSON.stringify(data.data)}\n`);
         }
     } catch (e) {
         console.error('Failed to parse Redis message for honors:', e, message);
