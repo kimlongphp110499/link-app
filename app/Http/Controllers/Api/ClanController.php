@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\ClanPointHistory;
+use App\Models\VoteHistory;
 use Carbon\Carbon;
 use App\Models\Clan;
 use App\Models\User;
@@ -30,15 +31,18 @@ class ClanController extends Controller
             $totalVotes = $clan->points;
 
             // Lấy người vote nhiều nhất trong tháng
-            $topVoter = ClanPointHistory::where('clan_id', $clan->id)
+            $clanPoints = ClanPointHistory::where('clan_id', $clan->id)->get();
+            foreach ($clanPoints as $clanPoint) {
+                $topVoter = VoteHistory::where('user_id', $clanPoint->user_id)
                 ->whereBetween('created_at', [
                     Carbon::now()->startOfMonth(),
                     Carbon::now()->endOfMonth()
                 ])
-                ->selectRaw('user_id, COUNT(user_id) as total_votes')
+                ->selectRaw('user_id, SUM(points_added) as total_votes')
                 ->groupBy('user_id')
                 ->orderByDesc('total_votes')
                 ->first();
+            }
 
            // Kiểm tra nếu $topVoter không null, lấy thông tin user
             $topVoterName = null;

@@ -99,7 +99,7 @@
     ClassicEditor
         .create(document.querySelector('#editor'), {
             ckfinder: {
-                uploadUrl: '/ckfinder/upload?_token=' + encodeURIComponent(token)
+                uploadUrl: '/admin/ckfinder/upload?_token=' + encodeURIComponent(token)
             },
             toolbar: [
                 'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|',
