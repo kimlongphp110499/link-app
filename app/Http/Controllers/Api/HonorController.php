@@ -23,6 +23,12 @@ class HonorController extends Controller
                 ->where('date', '>=', $today)
                 ->orderBy('date', 'asc')
                 ->get();
+            if (count($honors) == 0) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'No data',
+                ]);
+            }
             foreach ($honors as $honor) {
                 $honor->date = $honor->date->format('Y-m-d\TH:i:s.u\Z');
             }
