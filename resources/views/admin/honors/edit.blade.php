@@ -30,6 +30,22 @@
       @error('date')
         <div class="text-danger">{{ $message }}</div>
       @enderror
+
+      <div class="form-group">
+        <label for="duration">Duration (seconds)</label>
+        <div class="input-group">
+            <input type="number" name="duration" class="form-control" id="duration" value="{{ $honor->duration }}" min="1" required>
+            <div class="input-group-append">
+                <span class="input-group-text" id="duration-display">
+                    @php
+                        $minutes = floor($honor->duration / 60);
+                        $seconds = $honor->duration % 60;
+                        echo $minutes . ':' . ($seconds < 10 ? '0' : '') . $seconds;
+                    @endphp
+                </span>
+            </div>
+        </div>
+    </div>
     </div>
     <button type="submit" class="btn btn-warning">Update Honor</button>
   </form>

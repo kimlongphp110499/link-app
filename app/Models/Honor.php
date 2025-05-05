@@ -17,6 +17,7 @@ class Honor extends Model
         'url_name',
         'url',
         'date',
+        'duration',
     ];
 
     protected $casts = [

@@ -8,6 +8,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
 
 class HonorController extends Controller
 {
@@ -45,6 +46,13 @@ class HonorController extends Controller
     {
         try {
             Honor::create($request->validated());
+            Redis::publish('honors', json_encode([
+                'event' => 'honor.updated',
+                'data' => [
+                    'action' => 'create',
+                    'message' => 'Honors data has changed. Please refresh by calling API.'
+                ]
+            ]));
             return redirect()->route('admin.honors.index')->with('success', 'Honor created successfully!');
         } catch (QueryException $e) {
             return redirect()->back()->withErrors(['error' => 'Failed to create honor. Please try again.']);
@@ -62,9 +70,6 @@ class HonorController extends Controller
         } catch (ModelNotFoundException $e) {
             Log::error($e);
             return redirect()->route('admin.honors.index')
-                ->with('error', 'The record you are trying to edit was not found.');
-        } catch (\Exception $e) {
-            return redirect()->route('admin.honors.index')
                 ->with('error', 'An unexpected error has occurred.');
         }
     }
@@ -77,19 +82,22 @@ class HonorController extends Controller
         try {
             $honor = Honor::findOrFail($id);
             $honor->update($request->all());
+            $message = [
+                'event' => 'honor.updated',
+                'data' => [
+                    'action' => 'update',
+                    'message' => 'Honors data has changed. Please refresh by calling API.'
+                ]
+            ];
+            Redis::publish('honors', json_encode($message));
+            Log::info('Published to Redis:', $message);
 
             return redirect()->route('admin.honors.index')
                 ->with('success', 'Honor updated successfully!');
 
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            // Record not found
             return redirect()->route('admin.honors.index')
                 ->with('error', 'The honor record you are trying to update was not found.');
-
-        } catch (\Exception $e) {
-            // General exception
-            return redirect()->route('admin.honors.index')
-                ->with('error', 'An unexpected error occurred while updating the honor.');
         }
     }
 
@@ -102,29 +110,19 @@ class HonorController extends Controller
             DB::beginTransaction();
             $honor = Honor::findOrFail($id);
             $honor->delete();
+            Redis::publish('honors', json_encode([
+                'event' => 'honor.updated',
+                'data' => [
+                    'action' => 'delete',
+                    'message' => 'Honors data has changed. Please refresh by calling API.'
+                ]
+            ]));
             DB::commit();
 
             return redirect()->route('admin.honors.index')
                 ->with('success', 'Honor deleted successfully.');
-        } catch (ModelNotFoundException $e) {
-            // Log lỗi khi không tìm thấy bản ghi
-            Log::error('Honor not found for deletion: ID ' . $id);
-            return redirect()->route('admin.honors.index')
-                ->with('error', 'Honor not found.');
         } catch (QueryException $e) {
-            // Rollback nếu có lỗi database
             DB::rollBack();
-            Log::error('Database error while deleting honor ID ' . $id . ': ' . $e->getMessage(), [
-                'exception' => $e->getTraceAsString(),
-            ]);
-            return redirect()->route('admin.honors.index')
-                ->with('error', 'Failed to delete honor due to a database error.');
-        } catch (\Exception $e) {
-            // Rollback cho các lỗi khác
-            DB::rollBack();
-            Log::error('Unexpected error while deleting honor ID ' . $id . ': ' . $e->getMessage(), [
-                'exception' => $e->getTraceAsString(),
-            ]);
             return redirect()->route('admin.honors.index')
                 ->with('error', 'An unexpected error occurred while deleting the honor.');
         }
