@@ -26,7 +26,7 @@ class reportPointClanAndStar implements FromCollection, WithHeadings, WithTitle,
             ->leftJoin('clan_link', 'clans.id', '=', 'clan_link.clan_id')
             ->leftJoin('links', 'clan_link.link_id', '=', 'links.id')
             ->leftJoin('vote_histories', 'links.id', '=', 'vote_histories.link_id')
-            ->groupBy('clans.id', 'clans.name')
+            ->groupBy('clans.id', 'clans.name', 'clans.points')
             ->get()
             ->map(function ($item) {
                 // Làm sạch dữ liệu UTF-8
