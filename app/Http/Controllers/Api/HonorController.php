@@ -16,10 +16,9 @@ class HonorController extends Controller
     public function index(Request $request)
     {
         try {
-//            $today = Carbon::now()->format('Y-m-d H:i:s');
-//            dd($today);
             $params = $request->all();
-            $today = "2025-04-22 06:40:52";
+//            $today = "2025-04-22 06:40:52";
+            $today = Carbon::now()->format('Y-m-d H:i:s');
             $honors = Honor::select('id', 'url_name', 'url', 'date', 'duration')
                 ->where('date', '>=', $today)
                 ->orderBy('date', 'asc')
