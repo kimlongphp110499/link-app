@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Link;
 use App\Models\Schedule;
+use App\Models\VoteHistory;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -57,8 +58,7 @@ class UpdateSchedulesCommand extends Command
 
             // Xóa các bản ghi liên quan trong bảng vote_histories
             if ($linkId !== null) {
-                DB::table('vote_histories')
-                    ->where('link_id', $linkId)
+                VoteHistory::where('link_id', $linkId)
                     ->delete();
             }
             Schedule::truncate();
