@@ -39,7 +39,7 @@ class HonorController extends Controller
             foreach ($honors as $honor) {
                 $honor->date = $honor->date->format('Y-m-d\TH:i:s.u\Z');
             }
-            if (isset($params['offset']) && $params['offset'] == 'false') {
+            if (!array_key_exists('offset', $params) || $params['offset'] === 'false') {
                 return response()->json([
                     'status' => 'success',
                     'data' => $honors,
