@@ -81,7 +81,14 @@
     </button>
 
     <p id="status"></p>
-
+    <form action="{{ route('admin.links.import') }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        <div class="form-group">
+            <label for="file">Upload:</label>
+            <input type="file" name="file" id="file" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Import</button>
+    </form>
   <table class="table-striped table-bordered table">
     <thead>
       <tr>
