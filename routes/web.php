@@ -77,6 +77,7 @@ Route::name('admin.')->middleware('auth:admin')->prefix('admin')->group(function
     Route::get('/policy/edit', [PolicyController::class, 'edit'])->name('policy.edit');
     Route::post('/policy', [PolicyController::class, 'update'])->name('policy.update');
     Route::post('/ckfinder/upload', [CKFinderController::class, 'upload'])->name('ckfinder.upload');
+    Route::post('/links/import', [LinkController::class, 'import'])->name('links.import');
 });
 Route::resource('admin', AdminController::class)->middleware('auth:admin');
 

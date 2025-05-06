@@ -8,6 +8,8 @@ use App\Models\Clan;
 use App\Models\Schedule;
 use Illuminate\Support\Facades\Log;
 use App\Services\LinkService;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\LinksImport;
 
 class LinkController extends Controller
 {
@@ -143,5 +145,21 @@ class LinkController extends Controller
             Log::error("Error updating .env: " . $e->getMessage());
             return response()->json(['message' => 'Error updating .env file'], 500);
         }
+    }
+    /**
+     * Import data từ file Excel.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:2048',
+        ]);
+
+        Excel::import(new LinksImport, $request->file('file'));
+
+        return redirect()->route('admin.links.index')->with('success', 'Data imported successfully!');
     }
 }
