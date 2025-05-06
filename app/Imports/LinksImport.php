@@ -17,28 +17,30 @@ class LinksImport implements ToModel, WithHeadingRow
      */
     public function model(array $row)
     {
-        $link = Link::updateOrCreate(
-            ['title' => $row['title']],
-            [
-                'url' => $row['url'],
-                'video_id' => $row['video_id'],
-                'total_votes' => $row['total_votes'],
-                'duration' => $row['duration'],
-            ]
-        );
+        if($row['name']) {
+            $link = Link::updateOrCreate(
+                ['title' => $row['name']],
+                [
+                    'url' => $row['link'],
+                    'duration' => $row['time'] ?? 0,
+                    'video_id' => $row['id'] ?? 0,
+                    'total_votes' => $row['total_votes'] ?? 0,
+                ]
+            );
 
-        if (!empty($row['clans'])) {
-            $clanNames = explode(',', $row['clans']);
-            $clanIds = [];
-
-            foreach ($clanNames as $clanName) {
-                $clan = Clan::firstOrCreate(['name' => trim($clanName)]);
-                $clanIds[] = $clan->id;
+            if (!empty($row['performer'])) {
+                $clanNames = explode(',', $row['performer']);
+                $clanIds = [];
+    
+                foreach ($clanNames as $clanName) {
+                    $clan = Clan::firstOrCreate(['name' => trim($clanName)]);
+                    $clanIds[] = $clan->id;
+                }
+    
+                $link->clans()->sync($clanIds);
             }
-
-            $link->clans()->sync($clanIds);
+    
+            return $link;
         }
-
-        return $link;
     }
 }
