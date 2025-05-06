@@ -61,11 +61,11 @@
         });
 
         $('#duration').on('input', function() {
-        const seconds = parseInt($(this).val()) || 0;
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = seconds % 60;
-        const formattedTime = `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
-        $('#duration-display').text(formattedTime);
-    });
+            const seconds = parseInt($(this).val()) || 0;
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            const formattedTime = `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+            $('#duration-display').text(formattedTime);
+        });
     </script>
 @stop
