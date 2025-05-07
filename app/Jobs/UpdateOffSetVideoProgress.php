@@ -31,13 +31,14 @@ class UpdateOffSetVideoProgress implements ShouldQueue
         $cacheKey = "video_progress_{$this->videoId}";
         $currentSecond = Cache::get($cacheKey, 0);
         if ($currentSecond < $this->duration) {
-            $currentSecond++;
+//            dd($currentSecond, $this->duration);
+            $currentSecond += 1000;
 
-            Cache::put($cacheKey, $currentSecond, now()->addMinutes(10));
+            Cache::put($cacheKey, $currentSecond, ($this->duration + 300000) / 1000);
             UpdateOffSetVideoProgress::dispatch($this->videoId, $this->duration)
                 ->delay(now()->addSecond());
         } else {
-            Cache::put($cacheKey, 0, now()->addMinutes(10));
+            Cache::put($cacheKey, 0, ($this->duration + 300000) / 1000);
         }
     }
 }
