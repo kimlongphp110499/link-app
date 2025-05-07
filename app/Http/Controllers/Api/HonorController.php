@@ -37,8 +37,8 @@ class HonorController extends Controller
             }
 
             foreach ($honors as $honor) {
-                $honor->date = $honor->date->format('Y-m-d\TH:i:s.u\Z');
-                $honor->duration = $honor->duration * 1000 ; // Chuyển sang mili giây;
+                $honor->date = $honor->date->format('Y-m-d\TH:i:s.u');
+                $honor->duration = $honor->duration * 1000;
             }
             if (!array_key_exists('offset', $params) || $params['offset'] === 'false') {
                 return response()->json([
@@ -50,10 +50,11 @@ class HonorController extends Controller
             $currentHonor = $honors->firstWhere('date', '<=', $today) ?? $honors->first();
             $cacheKey = "video_progress_{$currentHonor->id}";
             $currentSecond = Cache::get($cacheKey);
+//            dd($currentSecond);
             if (is_null($currentSecond)) {
                 Log::info("Starting video honor ID {$currentHonor->id} playback");
-                $ttl = $currentHonor->duration + 300; // TTL = duration + 5 phút
-                Cache::put($cacheKey, 0, $ttl);
+                $ttl = $currentHonor->duration + 300000; // TTL = duration + 5 phút
+                Cache::put($cacheKey, 0, $ttl / 1000);
                 UpdateOffSetVideoProgress::dispatch($currentHonor->id, $currentHonor->duration);
 
                 return response()->json([
@@ -68,7 +69,7 @@ class HonorController extends Controller
                 'status' => 'success',
                 'data' => $honors,
                 'item' => $currentHonor,
-                'offset' => $currentSecond * 1000 , // Chuyển sang mili giây
+                'offset' => $currentSecond
             ]);
         } catch (\Exception $e) {
             Log::error('Unexpected error while fetching honors: ' . $e->getMessage());
