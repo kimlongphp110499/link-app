@@ -38,6 +38,7 @@ class HonorController extends Controller
 
             foreach ($honors as $honor) {
                 $honor->date = $honor->date->format('Y-m-d\TH:i:s.u\Z');
+                $honor->duration = $honor->duration * 1000 ; // Chuyển sang mili giây;
             }
             if (!array_key_exists('offset', $params) || $params['offset'] === 'false') {
                 return response()->json([
