@@ -37,7 +37,7 @@ class HonorController extends Controller
             }
 
             foreach ($honors as $honor) {
-                $honor->date = $honor->date->format('Y-m-d\TH:i:s.u');
+                $honor->date = $honor->date->format('Y-m-d\TH:i:s.uP');
                 $honor->duration = $honor->duration * 1000;
             }
             if (!array_key_exists('offset', $params) || $params['offset'] === 'false') {
@@ -50,7 +50,6 @@ class HonorController extends Controller
             $currentHonor = $honors->firstWhere('date', '<=', $today) ?? $honors->first();
             $cacheKey = "video_progress_{$currentHonor->id}";
             $currentSecond = Cache::get($cacheKey);
-//            dd($currentSecond);
             if (is_null($currentSecond)) {
                 Log::info("Starting video honor ID {$currentHonor->id} playback");
                 $ttl = $currentHonor->duration + 300000; // TTL = duration + 5 phút
