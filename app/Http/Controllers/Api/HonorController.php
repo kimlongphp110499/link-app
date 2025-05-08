@@ -63,7 +63,7 @@ class HonorController extends Controller
                     'start_time' => $startTime,
                     'duration' => $durationMilliseconds,
                     'timestamp' => $now->toIso8601String()
-                ], 202);
+                ], 200);
             }
             if ($offset > $durationMilliseconds) {
             // Video đã kết thúc
