@@ -3,11 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Jobs\UpdateOffSetVideoProgress;
 use App\Models\Honor;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -17,14 +14,13 @@ class HonorController extends Controller
     {
         try {
             $params = $request->all();
-//            $today = "2025-04-22 06:40:52";
-            $today = Carbon::now()->format('Y-m-d H:i:s');
+            $now = Carbon::now();
             $honors = Honor::select('id', 'url_name', 'url', 'date', 'duration')
-                ->where(function ($query) use ($today) {
-                    $query->where('date', '>=', $today)
-                          ->orWhere(function ($q) use ($today) {
-                              $q->where('date', '<=', $today)
-                                ->whereRaw('DATE_ADD(date, INTERVAL duration SECOND) >= ?', [$today]);
+                ->where(function ($query) use ($now) {
+                    $query->where('date', '>=', $now)
+                          ->orWhere(function ($q) use ($now) {
+                              $q->where('date', '<=', $now)
+                                ->whereRaw('DATE_ADD(date, INTERVAL duration SECOND) >= ?', [$now]);
                   });
                 })
                 ->orderBy('date', 'asc')
@@ -37,7 +33,7 @@ class HonorController extends Controller
             }
 
             foreach ($honors as $honor) {
-                $honor->date = $honor->date->format('Y-m-d\TH:i:s.uP');
+                $honor->date = Carbon::parse($honor->date);
                 $honor->duration = $honor->duration * 1000;
             }
             if (!array_key_exists('offset', $params) || $params['offset'] === 'false') {
@@ -47,28 +43,53 @@ class HonorController extends Controller
                 ]);
             }
 
-            $currentHonor = $honors->firstWhere('date', '<=', $today) ?? $honors->first();
-            $cacheKey = "video_progress_{$currentHonor->id}";
-            $currentSecond = Cache::get($cacheKey);
-            if (is_null($currentSecond)) {
-                Log::info("Starting video honor ID {$currentHonor->id} playback");
-                $ttl = $currentHonor->duration + 300000; // TTL = duration + 5 phút
-                Cache::put($cacheKey, 0, $ttl / 1000);
-                UpdateOffSetVideoProgress::dispatch($currentHonor->id, $currentHonor->duration);
+            $currentHonor = $honors->firstWhere('date', '<=', $now) ?? $honors->first();
+            $startTime = Carbon::parse($currentHonor->date);
+            $elapsedMilliseconds = $startTime->greaterThan($now) ? 0 : (int)
+            $startTime->diffInMilliseconds($now);
+            $durationMilliseconds = $currentHonor->duration;
+            $offset = $elapsedMilliseconds;
 
+            // Kiểm tra trạng thái video
+            if ($startTime->greaterThan($now)) {
+                // Video chưa bắt đầu
+                Log::info("Video honor ID {$currentHonor->id} has not started yet");
                 return response()->json([
                     'status' => 'success',
+                    'message' => 'Video has not started yet',
                     'data' => $honors,
+                    'item' => $currentHonor,
                     'offset' => 0,
-                ]);
+                    'start_time' => $startTime,
+                    'duration' => $durationMilliseconds,
+                    'timestamp' => $now->toIso8601String()
+                ], 202);
+            }
+            if ($offset > $durationMilliseconds) {
+            // Video đã kết thúc
+                Log::info("Video honor ID {$currentHonor->id} has ended");
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Video has ended',
+                    'data' => $honors,
+                    'item' => $currentHonor,
+                    'offset' => $durationMilliseconds,
+                    'start_time' => $startTime,
+                    'duration' => $durationMilliseconds,
+                    'timestamp' => $now->toIso8601String()
+                ], 200);
             }
 
-            Log::info("Retrieved currentSecond for honor ID {$currentHonor->id}: {$currentSecond}");
-            return response()->json([
+            // Video đang chạy
+            Log::info("Video honor ID {$currentHonor->id} is running at {$offset} ms");
+                return response()->json([
                 'status' => 'success',
                 'data' => $honors,
                 'item' => $currentHonor,
-                'offset' => $currentSecond
+                'offset' => $offset,
+                'start_time' => $startTime,
+                'duration' => $durationMilliseconds,
+                'timestamp' => $now->toIso8601String()
             ]);
         } catch (\Exception $e) {
             Log::error('Unexpected error while fetching honors: ' . $e->getMessage());
