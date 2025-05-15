@@ -18,7 +18,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:15|unique:users,phone,' . $auth->id,
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'nick_name' => 'nullable|string|max:255',
+            'nick_name' => 'nullable|string|max:255|unique:users,nick_name,' . $auth->id,
             // 'password' => 'nullable|string|min:6|confirmed',
         ]);
         // Cập nhật thông tin người dùng
@@ -107,5 +107,24 @@ class UserController extends Controller
         $request->user()->currentAccessToken()->delete();
 
         return response()->json(['message' => 'Logged out successfully'], 200);
+    }
+
+    public function destroy(Request $request)
+    {
+        // Xóa user đang đăng nhập
+        $user = $request->user(); // Lấy thông tin user đang đăng nhập
+
+        if ($user) {
+            $user->tokens()->delete(); // Xóa tất cả token đăng nhập của user (không bắt buộc)
+            $user->delete(); // Xóa user khỏi database
+
+            return response()->json([
+                'message' => 'User has been deleted successfully.',
+            ], 200);
+        }
+
+        return response()->json([
+            'message' => 'User not found or not authenticated.',
+        ], 404);
     }
 }

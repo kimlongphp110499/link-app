@@ -40,6 +40,7 @@ Route::middleware('auth:sanctum')->group(function () {
 //    Route::get('verify-video/{id}', [VideoPlaybackController::class, 'store']);
     Route::get('user-infor', [UserController::class, 'getUserInfo']);
     Route::post('/logout', [UserController::class, 'logout']);
+    Route::delete('user/destroy', [UserController::class, 'destroy']);
 });
 
 Route::post('/messages', [MessageController::class, 'saveMessage']);

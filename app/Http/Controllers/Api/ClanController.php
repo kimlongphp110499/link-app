@@ -26,18 +26,27 @@ class ClanController extends Controller
 
             // Lấy người vote nhiều nhất trong tháng
             // $clanPoints = ClanPointHistory::where('clan_id', $clan->id)->orderByDesc('created_at')->get();
-            if($clan->links) {
-                $topVoter = VoteHistory::withTrashed()->whereIn('link_id', $clan->links->pluck('id'))
-                ->whereBetween('created_at', [
-                    Carbon::now()->startOfMonth(),
-                    Carbon::now()->endOfMonth()
-                ])
-                ->selectRaw('user_id, SUM(points_voted) as total_votes')
-                ->groupBy('user_id')
-                ->orderByDesc('total_votes')
-                ->first();
+            if ($clan->links && $clan->links->isNotEmpty() && $clan->points > 0) {
+                $linkIds = $clan->links->pluck('id')->toArray();
+                $startOfMonth = Carbon::now()->startOfMonth()->toDateTimeString();
+                $endOfMonth = Carbon::now()->endOfMonth()->toDateTimeString();
+            
+                $topVoter = \DB::selectOne(
+                    'SELECT user_id, SUM(points_voted) as total_votes 
+                     FROM vote_histories 
+                     WHERE link_id IN ('.implode(',', array_fill(0, count($linkIds), '?')).') 
+                     AND created_at BETWEEN ? AND ? 
+                     AND (vote_histories.deleted_at IS NOT NULL 
+                          OR (deleted_at IS NULL 
+                              AND EXISTS (SELECT 1 FROM schedules WHERE schedules.link_id = vote_histories.link_id))) 
+                     GROUP BY user_id 
+                     ORDER BY total_votes DESC 
+                     LIMIT 1',
+                    array_merge($linkIds, [$startOfMonth, $endOfMonth])
+                );
+            } else {
+                $topVoter = null;
             }
-
            // Kiểm tra nếu $topVoter không null, lấy thông tin user
             $topVoterName = null;
             $topVoterUserId = null;
@@ -48,6 +57,7 @@ class ClanController extends Controller
                 if ($topVoterUser) {
                     $topVoterName = $topVoterUser->name;
                     $topVoterUserId = $topVoterUser->id;
+                    $topVoterAvatar = $topVoterUser->avatar ?? null;
                 }
                 $topVoterVotes = $topVoter->total_votes;
             }
@@ -58,6 +68,7 @@ class ClanController extends Controller
                 'top_voter' => $topVoterName,
                 'top_voter_user_id' => $topVoterUserId,
                 'top_voter_votes' => (int) $topVoterVotes, // Số lần vote của người vote nhiều nhất
+                'top_voter_avatar' => $topVoterAvatar ?? null,
             ];
         }
 
