@@ -17,6 +17,7 @@ class StoreHonorRequest extends FormRequest
             'url_name' => 'required|string|max:255',
             'url' => 'required|url|max:255',
             'date' => 'required|date_format:Y/m/d H:i',
+            'duration' => 'integer',
         ];
     }
 }

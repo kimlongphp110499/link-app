@@ -30,6 +30,22 @@
       @error('date')
         <div class="text-danger">{{ $message }}</div>
       @enderror
+
+      <div class="form-group">
+        <label for="duration">Duration (seconds)</label>
+        <div class="input-group">
+            <input type="number" name="duration" class="form-control" id="duration" value="{{ $honor->duration }}" min="1" required>
+            <div class="input-group-append">
+                <span class="input-group-text" id="duration-display">
+                    @php
+                        $minutes = floor($honor->duration / 60);
+                        $seconds = $honor->duration % 60;
+                        echo $minutes . ':' . ($seconds < 10 ? '0' : '') . $seconds;
+                    @endphp
+                </span>
+            </div>
+        </div>
+    </div>
     </div>
     <button type="submit" class="btn btn-warning">Update Honor</button>
   </form>
@@ -45,6 +61,14 @@
             altInput: true,
             altFormat: "d/m/Y H:i",
             time_24hr: true,
+        });
+
+        $('#duration').on('input', function() {
+            const seconds = parseInt($(this).val()) || 0;
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            const formattedTime = `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+            $('#duration-display').text(formattedTime);
         });
     </script>
 @stop

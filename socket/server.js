@@ -43,10 +43,10 @@ subscriber.subscribe('m4u_database_points-update', (err) => {
 
 subscriber.on('message', (channel, message) => {
   console.log('Received message on channel:', channel, message);
+  let data;
+  data = JSON.parse(message);
   if (channel === 'm4u_database_points-update') {
-    let data;
     try {
-      data = JSON.parse(message);
       console.log('Parsed points update:', data);
       // Emit trực tiếp points_updated tới room user:${user_id}
       io.to(`user:${data.user_id}`).emit('points_updated', {
@@ -59,6 +59,30 @@ subscriber.on('message', (channel, message) => {
       console.error('Failed to parse Redis message:', e, message);
     }
   }
+});
+
+subscriber.subscribe('m4u_database_honors', (err) => {
+  if (err) {
+    console.error('Failed to subscribe:', err);
+  } else {
+    console.log('Subscribed to m4u_database_honors');
+  }
+});
+subscriber.on('message', (channel, message) => {
+  console.log('Received message on channel:', channel, message);
+  let data;
+  data = JSON.parse(message);
+  if (channel === 'm4u_database_honors') {
+    try {
+        console.log('Parsed honor update ');
+        if (data.event === 'honor.updated') {
+            io.emit('honor.updated', data.data);
+            console.log('Emitted honor.updated:', data.data);
+        }
+    } catch (e) {
+        console.error('Failed to parse Redis message for honors:', e, message);
+    }
+ }
 });
 
 // Lắng nghe kết nối từ client
