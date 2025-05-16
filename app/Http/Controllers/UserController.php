@@ -20,6 +20,7 @@ class UserController extends Controller
     // Hiển thị form tạo user
     public function create()
     {
+        session()->put('return_url', url()->previous());
         return view('admin.users.create');
     }
 
@@ -29,21 +30,23 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+            // 'password' => 'required|string|min:8|confirmed',
         ]);
 
         User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            // 'password' => Hash::make($request->password),
         ]);
 
-        return redirect()->route('admin.users.index')->with('success', 'User created successfully!');
+        return redirect()->to(session('return_url', route('admin.users.index')))
+        ->with('success', 'User created successfully.');
     }
 
     // Hiển thị form chỉnh sửa user
     public function edit($id)
     {
+        session()->put('return_url', url()->previous());
         $user = User::findOrFail($id);
         return view('admin.users.edit', compact('user'));
     }
@@ -88,14 +91,17 @@ class UserController extends Controller
             }
         }
 
-        return redirect()->route('admin.users.index')->with('success', 'User updated successfully!');
+        return redirect()->to(session('return_url', route('admin.users.index')))
+        ->with('success', 'User updated successfully.');
     }
 
     // Xóa user
     public function destroy($id)
     {
+        session()->put('return_url', url()->previous());
         User::findOrFail($id)->delete();
-        return redirect()->route('admin.users.index')->with('success', 'User deleted successfully!');
+                return redirect()->to(session('return_url', route('admin.users.index')))
+        ->with('success', 'User deleted successfully.');
     }
 
     

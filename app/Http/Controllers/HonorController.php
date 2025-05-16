@@ -18,7 +18,7 @@ class HonorController extends Controller
     public function index()
     {
         try {
-            $honors = Honor::select('id', 'url_name', 'url', 'date')->paginate(20);
+            $honors = Honor::select('id', 'url_name', 'url', 'date')->paginate(5);
             return view('admin.honors.index', compact('honors'));
         } catch (\Exception $e) {
             Log::error('Failed to retrieve honors list: ' . $e->getMessage(), [
@@ -36,6 +36,7 @@ class HonorController extends Controller
      */
     public function create()
     {
+        session()->put('return_url', url()->previous());
         return view('admin.honors.create');
     }
 
@@ -53,7 +54,7 @@ class HonorController extends Controller
                     'message' => 'Honors data has changed. Please refresh by calling API.'
                 ]
             ]));
-            return redirect()->route('admin.honors.index')->with('success', 'Honor created successfully!');
+            return redirect()->to(session('return_url', route('admin.honors.index')))->with('success', 'Honor created successfully!');
         } catch (QueryException $e) {
             return redirect()->back()->withErrors(['error' => 'Failed to create honor. Please try again.']);
         }
@@ -64,6 +65,7 @@ class HonorController extends Controller
      */
     public function edit($id)
     {
+        session()->put('return_url', url()->previous());
         try {
             $honor = Honor::findOrFail($id);
             return view('admin.honors.edit', compact('honor'));
@@ -92,7 +94,7 @@ class HonorController extends Controller
             Redis::publish('honors', json_encode($message));
             Log::info('Published to Redis:', $message);
 
-            return redirect()->route('admin.honors.index')
+            return redirect()->to(session('return_url', route('admin.honors.index')))
                 ->with('success', 'Honor updated successfully!');
 
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
@@ -106,6 +108,7 @@ class HonorController extends Controller
      */
     public function destroy($id)
     {
+        session()->put('return_url', url()->previous());
         try {
             DB::beginTransaction();
             $honor = Honor::findOrFail($id);
@@ -119,7 +122,7 @@ class HonorController extends Controller
             ]));
             DB::commit();
 
-            return redirect()->route('admin.honors.index')
+            return redirect()->to(session('return_url', route('admin.honors.index')))
                 ->with('success', 'Honor deleted successfully.');
         } catch (QueryException $e) {
             DB::rollBack();

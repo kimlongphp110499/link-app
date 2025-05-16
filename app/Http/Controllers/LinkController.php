@@ -38,6 +38,7 @@ class LinkController extends Controller
     // Hiển thị form tạo link
     public function create()
     {
+        session()->put('return_url', url()->previous());
         $clans = Clan::all();
 
         return view('admin.links.create', compact('clans'));
@@ -63,12 +64,14 @@ class LinkController extends Controller
 
         $link->clans()->sync($request->clan_ids);
 
-        return redirect()->route('admin.links.index')->with('success', 'Link created successfully!');
+        return redirect()->to(session('return_url', route('admin.links.index')))
+        ->with('success', 'Link created successfully.');
     }
 
     // Hiển thị form chỉnh sửa link
     public function edit($id)
     {
+        session()->put('return_url', url()->previous());
         $link = Link::findOrFail($id);
         $clans = Clan::all();
         $selectedClans = $link->clans->pluck('id')->toArray();
@@ -98,15 +101,17 @@ class LinkController extends Controller
         ]);
         $link->clans()->sync($request->clan_ids);
 
-
-        return redirect()->route('admin.links.index')->with('success', 'Link updated successfully!');
+        return redirect()->to(session('return_url', route('admin.links.index')))
+        ->with('success', 'Link updated successfully.');
     }
 
     // Xóa link
     public function destroy($id)
     {
         Link::findOrFail($id)->delete();
-        return redirect()->route('admin.links.index')->with('success', 'Link deleted successfully!');
+
+        return redirect()->to(session('return_url', route('admin.links.index')))
+        ->with('success', 'Link updated successfully.');
     }
 
     // Gắn clan cho link

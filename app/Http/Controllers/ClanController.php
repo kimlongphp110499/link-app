@@ -17,6 +17,7 @@ class ClanController extends Controller
     // Hiển thị form tạo mới clan
     public function create()
     {
+        session()->put('return_url', url()->previous());
         return view('admin.clans.create');
     }
 
@@ -30,13 +31,14 @@ class ClanController extends Controller
         $clan = Clan::create([
             'name' => $request->name,
         ]);
-
-        return redirect()->route('admin.clans.index')->with('success', 'Clan created successfully!');
+        return redirect()->to(session('return_url', route('admin.clans.index')))
+        ->with('success', 'Clan created successfully.');
     }
 
     // Hiển thị form chỉnh sửa clan
     public function edit($id)
     {
+        session()->put('return_url', url()->previous());
         $clan = Clan::findOrFail($id);
         return view('admin.clans.edit', compact('clan'));
     }
@@ -55,15 +57,17 @@ class ClanController extends Controller
             'points' => $request->points,
         ]);
 
-        return redirect()->route('admin.clans.index')->with('success', 'Clan updated successfully!');
+        return redirect()->to(session('return_url', route('admin.clans.index')))->with('success', 'Clan updated successfully!');
     }
 
     // Xóa clan
     public function destroy($id)
     {
+        session()->put('return_url', url()->previous());
         $clan = Clan::findOrFail($id);
         $clan->delete();
 
-        return redirect()->route('admin.clans.index')->with('success', 'Clan deleted successfully!');
+        return redirect()->to(session('return_url', route('admin.clans.index')))
+        ->with('success', 'Clan deleted successfully.');
     }
 }
