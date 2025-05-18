@@ -36,12 +36,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('users/vote-history', [UserVoteLinkController::class, 'voteHistory']);
     Route::get('clans/top-voter', [ClanController::class, 'getClansWithTopVoter']);
     Route::get('links/search', [UserVoteLinkController::class, 'searchLinks']);
-    Route::get('video-honors', [HonorController::class, 'index']);
 //    Route::get('verify-video/{id}', [VideoPlaybackController::class, 'store']);
     Route::get('user-infor', [UserController::class, 'getUserInfo']);
     Route::post('/logout', [UserController::class, 'logout']);
     Route::delete('user/destroy', [UserController::class, 'destroy']);
 });
+
+Route::get('video-honors', [HonorController::class, 'index']);
 
 Route::post('/messages', [MessageController::class, 'saveMessage']);
 // api để lấy danh sách rank links
