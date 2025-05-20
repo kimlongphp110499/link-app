@@ -15,8 +15,10 @@ class PolicyController extends Controller
     public function edit()
     {
         $bladePath = resource_path('views/policy/show.blade.php');
-        $content = File::get($bladePath);
-        return view('policy.edit', compact('content'));
+        $bladeTermPath = resource_path('views/terms/show.blade.php');
+        $policyContent = File::get($bladePath);
+        $termContent = File::get($bladeTermPath);
+        return view('policy.edit', compact('policyContent', 'termContent'));
     }
 
     public function update(Request $request)

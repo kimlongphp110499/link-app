@@ -19,6 +19,7 @@ use App\Http\Controllers\ClanController;
 use App\Http\Controllers\HonorController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\PolicyController;
+use App\Http\Controllers\TermsController;
 use App\Http\Controllers\CKFinderController;
 use Illuminate\Support\Facades\File;
 
@@ -76,6 +77,8 @@ Route::name('admin.')->middleware('auth:admin')->prefix('admin')->group(function
     Route::post('/video-status', [LinkController::class, 'videoStatus']);
     Route::get('/policy/edit', [PolicyController::class, 'edit'])->name('policy.edit');
     Route::post('/policy', [PolicyController::class, 'update'])->name('policy.update');
+    Route::get('/term/edit', [TermsController::class, 'edit'])->name('term.edit');
+    Route::post('/term', [TermsController::class, 'update'])->name('term.update');
     Route::post('/ckfinder/upload', [CKFinderController::class, 'upload'])->name('ckfinder.upload');
     Route::post('/links/import', [LinkController::class, 'import'])->name('links.import');
 });
@@ -87,3 +90,4 @@ Route::get('/', function () {
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('/policy', [PolicyController::class, 'show'])->name('policy.show');
+Route::get('/term', [TermsController::class, 'show'])->name('term.show');
