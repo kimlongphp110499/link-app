@@ -36,7 +36,7 @@ class Kernel extends ConsoleKernel
               ->when(function () {
                   return now()->isLastOfMonth();
               });
-
+        $schedule->command('backup:daily')->dailyAt('02:00');
     }
 
     /**
