@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\File;
+use Carbon\Carbon;
 
 class DailyBackup extends Command
 {
@@ -54,9 +56,23 @@ class DailyBackup extends Command
 
         if ($resultCode === 0) {
             $this->info("Backup completed successfully! File saved at: $backupFile");
+            $this->deleteOldBackups($backupPath);
         } else {
             $this->error("Backup failed! Please check your configuration.");
             $this->error("Command executed: $command");
+        }
+    }
+
+    private function deleteOldBackups($backupPath)
+    {
+        $files = File::files($backupPath);
+
+        foreach ($files as $file) {
+            $fileModifiedTime = Carbon::createFromTimestamp($file->getMTime());
+            if (now()->diffInDays($fileModifiedTime) > 7) {
+                File::delete($file);
+                $this->info("Deleted old backup: " . $file->getFilename());
+            }
         }
     }
 }
