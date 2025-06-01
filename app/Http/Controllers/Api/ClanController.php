@@ -60,16 +60,17 @@ class ClanController extends Controller
                     $topVoterAvatar = $topVoterUser->avatar ?? null;
                 }
                 $topVoterVotes = $topVoter->total_votes;
+                 // Thêm thông tin vào mảng kết quả
+                $result[] = [
+                    'clan_name' => $clan->name,
+                    'total_votes' => $totalVotes, // Tổng số lần vote cho clan
+                    'top_voter' => $topVoterName,
+                    'top_voter_user_id' => $topVoterUserId,
+                    'top_voter_votes' => (int) $topVoterVotes, // Số lần vote của người vote nhiều nhất
+                    'top_voter_avatar' => $topVoterAvatar ?? null,
+                ];
             }
-            // Thêm thông tin vào mảng kết quả
-            $result[] = [
-                'clan_name' => $clan->name,
-                'total_votes' => $totalVotes, // Tổng số lần vote cho clan
-                'top_voter' => $topVoterName,
-                'top_voter_user_id' => $topVoterUserId,
-                'top_voter_votes' => (int) $topVoterVotes, // Số lần vote của người vote nhiều nhất
-                'top_voter_avatar' => $topVoterAvatar ?? null,
-            ];
+           
         }
 
         return response()->json($result, 200);
