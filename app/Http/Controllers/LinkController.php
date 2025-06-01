@@ -108,6 +108,7 @@ class LinkController extends Controller
     // Xóa link
     public function destroy($id)
     {
+        session()->put('return_url', url()->previous());
         Link::findOrFail($id)->delete();
 
         return redirect()->to(session('return_url', route('admin.links.index')))
