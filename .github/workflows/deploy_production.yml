@@ -27,7 +27,7 @@ jobs:
 
           git pull origin master
 
-          composer install --no-dev --optimize-autoloader
+          composer install --no-dev --optimize-autoloader --ignore-platform-req=ext-fileinfo
 
           # run Artisan
           php artisan migrate --force

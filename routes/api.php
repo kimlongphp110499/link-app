@@ -13,6 +13,8 @@ use App\Http\Controllers\Api\TransactionHistoryController;
 use App\Http\Controllers\Api\GoogleAuthController;
 use App\Http\Controllers\Api\HonorController;
 use App\Http\Controllers\VideoController;
+use App\Http\Controllers\Api\AppleAuthController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -51,6 +53,6 @@ Route::get('links/rank', [UserVoteLinkController::class, 'rankLinks']);
 
 Route::post('/auth/google', [GoogleAuthController::class, 'authenticate']);
 Route::post('/auth/facebook', [FacebookAuthController::class, 'loginWithFacebook']);
-
+Route::post('/auth/apple', [AppleAuthController::class, 'appleLogin']);
 //for api
 Route::get('/current-video', [VideoController::class, 'getCurrentVideo']);
