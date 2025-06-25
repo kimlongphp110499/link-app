@@ -67,7 +67,13 @@ class VideoController extends Controller
                     }
                     $pointInsertClan[$clanId]++;
                 }
-                ClanPointHistory::insert($dataToInsert);
+
+                if (!empty($dataToInsert)) {
+                    ClanPointHistory::insert($dataToInsert);
+                } else {
+                    Log::info("No valid data to insert into clan_point_histories for link_id {$link->id}");
+                }
+
                 ClanTempMember::where('link_id', $link->id)->delete();
                 foreach ($pointInsertClan as $clanId => $count) {
                     Clan::where('id', $clanId)->increment('points', $count);
