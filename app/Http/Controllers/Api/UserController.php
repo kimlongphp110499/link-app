@@ -17,7 +17,7 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:15|unique:users,phone,' . $auth->id,
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:200',
             'nick_name' => 'nullable|string|max:255|unique:users,nick_name,' . $auth->id,
             // 'password' => 'nullable|string|min:6|confirmed',
         ]);
