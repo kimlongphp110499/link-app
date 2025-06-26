@@ -95,6 +95,8 @@ class AppleAuthController extends Controller
                     'name' => $user->name,
                     'email' => $user->email,
                     'apple_id' => $user->apple_id,
+                    'nick_name' => $user->nick_name,
+                    'avatar' => $user->avatar,
                 ],
             ], 200);
 
