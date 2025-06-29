@@ -208,8 +208,8 @@ cron.schedule('* * * * *', () => {
     }
     messages.forEach((message) => {
       const parsedMessage = JSON.parse(message);
-      if (Date.now() - parsedMessage.timestamp > 120 * 60 * 1000) {
-        // Nếu tin nhắn đã quá 120 phút, xóa tin nhắn khỏi Redis
+      if (Date.now() - parsedMessage.timestamp > 1440 * 60 * 1000) {
+        // Nếu tin nhắn đã quá 1440 phút, xóa tin nhắn khỏi Redis
         redis.lrem('chat:messages', 0, message, (err, response) => {
           if (err) {
             console.error('Error deleting expired message:', err);
