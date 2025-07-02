@@ -24,6 +24,7 @@ class VideoController extends Controller
         }
 
         $link = $currentSchedule->link;
+        Log::info(" video_id >>>>" . $link->video_id);
         $userWithMaxVotes = $link->voteHistories()
             ->selectRaw('user_id, SUM(points_voted) as total_points')
             ->groupBy('user_id')
