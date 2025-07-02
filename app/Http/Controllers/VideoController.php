@@ -51,7 +51,8 @@ class VideoController extends Controller
             $memberClan = ClanTempMember::select('user_id', 'clan_id')
                     ->where('link_id', $link->id)
                     ->get();
-            if (!$memberClan->isEmpty()) {
+            Log::info("Data before delete >> {$memberClan}");
+            if ($memberClan->isNotEmpty()) {
                 $dataToInsert = [];
                 $pointInsertClan = [];
                 foreach ($memberClan as $member) {
@@ -68,13 +69,19 @@ class VideoController extends Controller
                     $pointInsertClan[$clanId]++;
                 }
 
+                $deleted = ClanTempMember::where('link_id', $link->id)->delete();
+                if (!$deleted) {
+                    $memberClanDelete = ClanTempMember::select('user_id', 'clan_id')
+                    ->where('link_id', $link->id)
+                    ->get();
+                    Log::info("Data after delete >> {$memberClanDelete}");
+                }
+
                 if (!empty($dataToInsert)) {
                     ClanPointHistory::insert($dataToInsert);
                 } else {
                     Log::info("No valid data to insert into clan_point_histories for link_id {$link->id}");
                 }
-
-                ClanTempMember::where('link_id', $link->id)->delete();
                 foreach ($pointInsertClan as $clanId => $count) {
                     Clan::where('id', $clanId)->increment('points', $count);
                 }
