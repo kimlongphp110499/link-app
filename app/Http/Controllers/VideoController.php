@@ -48,7 +48,7 @@ class VideoController extends Controller
 
         try {
             DB::beginTransaction();
-            $memberClan = ClanTempMember::select('user_id', 'clan_id')
+            $memberClan = ClanTempMember::select('user_id', 'link_id', 'clan_id')
                     ->where('link_id', $link->id)
                     ->get();
             Log::info("Data before delete >> {$memberClan}");
@@ -71,7 +71,7 @@ class VideoController extends Controller
 
                 $deleted = ClanTempMember::where('link_id', $link->id)->delete();
                 if (!$deleted) {
-                    $memberClanDelete = ClanTempMember::select('user_id', 'clan_id')
+                    $memberClanDelete = ClanTempMember::select('user_id', 'link_id', 'clan_id')
                     ->where('link_id', $link->id)
                     ->get();
                     Log::info("Data after delete >> {$memberClanDelete}");
