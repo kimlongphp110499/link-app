@@ -17,14 +17,12 @@ class VideoController extends Controller
     public function getCurrentVideo()
     {
         $now = Carbon::now();
-        Log::info("Current time: " . $now->toIso8601String());
         $currentSchedule = Schedule::first();
         if (!$currentSchedule) {
             return response()->json(['message' => 'No video scheduled'], 404);
         }
 
         $link = $currentSchedule->link;
-        Log::info(" video_id >>>>" . $link->video_id);
         $userWithMaxVotes = $link->voteHistories()
             ->selectRaw('user_id, SUM(points_voted) as total_points')
             ->groupBy('user_id')
@@ -52,7 +50,6 @@ class VideoController extends Controller
             $memberClan = ClanTempMember::select('user_id', 'link_id', 'clan_id')
                     ->where('link_id', $link->id)
                     ->get();
-            Log::info("Data before delete >> {$memberClan}");
             if ($memberClan->isNotEmpty()) {
                 $dataToInsert = [];
                 $pointInsertClan = [];
@@ -69,19 +66,9 @@ class VideoController extends Controller
                     }
                     $pointInsertClan[$clanId]++;
                 }
-
-                $deleted = ClanTempMember::where('link_id', $link->id)->delete();
-                if (!$deleted) {
-                    $memberClanDelete = ClanTempMember::select('user_id', 'link_id', 'clan_id')
-                    ->where('link_id', $link->id)
-                    ->get();
-                    Log::info("Data after delete >> {$memberClanDelete}");
-                }
-
+                ClanTempMember::where('link_id', $link->id)->delete();
                 if (!empty($dataToInsert)) {
                     ClanPointHistory::insert($dataToInsert);
-                } else {
-                    Log::info("No valid data to insert into clan_point_histories for link_id {$link->id}");
                 }
                 foreach ($pointInsertClan as $clanId => $count) {
                     Clan::where('id', $clanId)->increment('points', $count);
