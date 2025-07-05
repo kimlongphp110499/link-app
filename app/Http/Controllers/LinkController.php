@@ -28,7 +28,7 @@ class LinkController extends Controller
     // Hiển thị danh sách links
     public function index()
     {
-        $links = Link::with('clans')->paginate(20);
+        $links = Link::with('clans')->orderByDesc('total_votes')->paginate(20);
         $clans = Clan::all();
         $checkSchedule = Schedule::count();
 

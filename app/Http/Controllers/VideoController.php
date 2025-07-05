@@ -45,6 +45,14 @@ class VideoController extends Controller
              return response()->json(['message' => 'Please wait'], 202); // Trả về thông báo "Hãy chờ"
          }
 
+        return response()->json([
+                'link' =>$link,
+                'offset' => $elapsedMilliseconds,
+                'start_time' => $startTime,
+                'duration' => $durationMilliseconds,
+                'timestamp' => $now->toIso8601String(),
+            ]);
+
         try {
             DB::beginTransaction();
             $memberClan = ClanTempMember::select('user_id', 'link_id', 'clan_id')
@@ -76,13 +84,7 @@ class VideoController extends Controller
             }
             DB::commit();
 
-            return response()->json([
-                'link' =>$link,
-                'offset' => $elapsedMilliseconds,
-                'start_time' => $startTime,
-                'duration' => $durationMilliseconds,
-                'timestamp' => $now->toIso8601String(),
-            ]);
+           
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
