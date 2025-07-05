@@ -62,7 +62,7 @@ class UpdateSchedulesCommand extends Command
                 VoteHistory::where('link_id', $linkId)
                     ->delete();
                 ProcessClanPoints::dispatch($linkId)
-                ->onQueue('high');
+                ->onQueue('default');
             }
             Schedule::truncate();
             Log::info("Cleared current schedule");
