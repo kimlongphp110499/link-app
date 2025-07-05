@@ -10,7 +10,7 @@ class ClanController extends Controller
     // Hiển thị danh sách clans
     public function index()
     {
-        $clans = Clan::paginate(20);
+        $clans = Clan::orderByDesc('points')->paginate(20);
         return view('admin.clans.index', compact('clans'));
     }
 

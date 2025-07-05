@@ -10,6 +10,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use App\Jobs\ProcessClanPoints;
 
 class UpdateSchedulesCommand extends Command
 {
@@ -60,6 +61,8 @@ class UpdateSchedulesCommand extends Command
             if ($linkId !== null) {
                 VoteHistory::where('link_id', $linkId)
                     ->delete();
+                ProcessClanPoints::dispatch($linkId)
+                ->onQueue('high');
             }
             Schedule::truncate();
             Log::info("Cleared current schedule");

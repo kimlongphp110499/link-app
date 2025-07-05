@@ -13,7 +13,7 @@ class UserController extends Controller
     // Hiển thị danh sách users
     public function index()
     {
-        $users = User::paginate(20);
+        $users = User::orderByDesc('points')->paginate(20);
         return view('admin.users.index', compact('users'));
     }
 
