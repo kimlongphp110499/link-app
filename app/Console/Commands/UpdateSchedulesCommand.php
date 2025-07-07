@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\ClanTempMember;
 use App\Models\Link;
 use App\Models\Schedule;
 use App\Models\VoteHistory;
@@ -61,6 +62,7 @@ class UpdateSchedulesCommand extends Command
             if ($linkId !== null) {
                 VoteHistory::where('link_id', $linkId)
                     ->delete();
+                ClanTempMember::where('link_id', $linkId)->delete();
                 ProcessClanPoints::dispatch($linkId)
                 ->onQueue('default');
             }
