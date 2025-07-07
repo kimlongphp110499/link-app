@@ -36,17 +36,25 @@ class ProcessClanPoints implements ShouldQueue
 
             if ($memberClan->isNotEmpty()) {
                 $dataToInsert = [];
+                $uniquePairs = []; // Track unique user_id and clan_id pairs
                 $pointInsertClan = [];
-
+        
                 foreach ($memberClan as $member) {
-                    $dataToInsert[] = [
-                        'user_id' => $member->user_id,
-                        'clan_id' => $member->clan_id,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
-                    $clanId = $member->clan_id;
-                    $pointInsertClan[$clanId] = ($pointInsertClan[$clanId] ?? 0) + 1;
+                    $pairKey = $member->user_id . '_' . $member->clan_id; // Unique key for each pair
+                    if (!isset($uniquePairs[$pairKey])) {
+                        $dataToInsert[] = [
+                            'user_id' => $member->user_id,
+                            'clan_id' => $member->clan_id,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
+                        $uniquePairs[$pairKey] = true;
+                        $clanId = $member->clan_id;
+                        if (!isset($pointInsertClan[$clanId])) {
+                            $pointInsertClan[$clanId] = 0;
+                        }
+                        $pointInsertClan[$clanId]++;
+                    }
                 }
 
                 // Xóa ClanTempMember trước để tránh lặp lại xử lý
