@@ -31,11 +31,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('clan:clear-points')->dailyAt('23:59');
         // $schedule->job(new SendMonthlyPointReport())->dailyAt('23:55');
        $schedule->command('clan:clear-points')->monthlyOn(1, '00:00');
-       $schedule->job(new SendMonthlyPointReport())
-              ->lastDayOfMonth('23:59')
-              ->when(function () {
-                  return now()->isLastOfMonth();
-              });
+       $schedule->job(new SendMonthlyPointReport())->lastDayOfMonth('23:59');
         $schedule->command('backup:daily')->dailyAt('02:00');
     }
 
